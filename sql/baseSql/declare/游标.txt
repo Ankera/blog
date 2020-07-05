@@ -1,0 +1,24 @@
+1.  游标是查询的临时结果集
+    需求:
+    编写存储过程，使用游标，把 uid 为偶数的记录逐一更新用户名
+    实例:
+        CREATE DEFINER=`root`@`localhost` PROCEDURE `test_yb`()
+        BEGIN
+            DECLARE stopflag INT DEFAULT 0;
+            DECLARE my_uname VARCHAR(32) DEFAULT "";
+            DECLARE uname_cur CURSOR FOR SELECT uname FROM users WHERE uid%2=0;
+            DECLARE CONTINUE HANDLER FOR NOT found SET stopflag = 1;
+            
+            OPEN uname_cur;
+            FETCH uname_cur INTO my_uname;
+            WHILE(stopflao = 0) DO
+                BEGIN
+                    UPDATE users SET uname=CONCAT(my_uname,"_cur") WHERE uname = my_uname;
+                    FETCH uname_cur INTO my_uname;
+                END;	
+            END WHILE;
+            CLOSE uname_cur;
+        END
+    调用:
+        CALL test_yb();
+

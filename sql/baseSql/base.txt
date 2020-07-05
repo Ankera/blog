@@ -1,0 +1,807 @@
+<一> MAC启动停止 测试
+1.  启动MySQL服务
+sudo /usr/local/mysql/support-files/mysql.server start
+
+2.  停止MySQL服务
+sudo /usr/local/mysql/support-files/mysql.server stop
+ 
+3.  重启MySQL服务
+sudo /usr/local/mysql/support-files/mysql.server restart
+
+备注: 以上需要输入电脑密码,不是mysql密码
+
+
+<二> 进入mysql编辑模式
+1.  进入数据库:
+    1.1     mysql -u root -p 
+            输入密码: 199116
+2.  输入密码: 199116
+3.  mysql退出三种方法：
+        mysql > exit;
+        mysql > quit;
+        mysql > \q;
+4.  修改数据库密码:
+    安装mysql之后, 有几个默认的数据库, 其中root信息存储在mysql数据库中;
+    4.1 进入该数据库  use mysql;
+        老版本 update user set password=password('密码') where User='root';
+        新版本 update mysql.user set authentication_string=password('密码') where User='root' and Host='localhost';
+        上面命令更新完之后: flush privileges;  强制刷新更新密码,才可以起作用
+
+    4.2 mysqladmin -u root -p 新密码   
+        再次输入密码提示: 老密码
+        回车修改成功
+        备注: mysql在修改密码之后, Navicat for MySQL要删除连接重新建立新的连接
+
+
+<三> 常用SQL数据类型 
+    double: 浮点型, 例如 double(5,2)表示最多是5位,其中有2位必须是小数. 即最大值是999.99;
+    char: 固定长度字符串类型; char(10) 'abc       '
+    varchar: 可变字符串长度类型; char(10) ’abc'
+    text: 字符串类型
+    blob: 二进制类型
+    date: 日期类型: 格式为 yyyy-mm-dd
+    time: 时间类型: 格式位 hh:mm:ss
+    datetime: 日期时间类型 格式为 yyyy-mm-dd hh:mm:ss
+    备注: 在mysql中, 所有的字符串类型和日期类型都要用单引号括起来, 'wuhan' '2018-11-10'
+
+
+<四> MYISAM与INNODB区别
+1.  MYISAM
+    a. 它不支持事务,也不支持外键,尤其是访问速度快,对事物完整性没有要求,
+    或者以SElECT, INSERT, UPDATE, DELETE为主的应用基本都可以使用这个引擎来创建表.
+    b. 每个MyiSA在磁盘上存储3个文件, 其中文件名和表名都相同, 
+    但是扩展名分别为: 
+        .frm(存储表定义)
+        .myd(MYdata相同, 存储数据)
+        .myi(Yindex相同, 存储索引)
+2.  INNODB
+    INNODB存储引擎提供了具有提交,回滚,崩溃恢复能力的事务安全.
+    但是对比MYISAM的存储引擎,INNODB写的处理效率差一些并且会占用更多的磁盘空间以保留数据和索引.
+
+
+全文举例中使用的表结构
++------------+--------------+------+-----+---------+----------------+
+| Field      | Type         | Null | Key | Default | Extra          |
++------------+--------------+------+-----+---------+----------------+
+| id         | int(11)      | NO   | PRI | NULL    | auto_increment |
+| name       | varchar(25)  | YES  |     | NULL    |                |
+| age        | int(11)      | YES  |     | NULL    |                |
+| email      | varchar(255) | YES  |     | NULL    |                |
+| score      | int(11)      | YES  |     | NULL    |                |
+| gender     | varchar(255) | YES  |     | NULL    |                |
+| department | varchar(50)  | YES  |     | NULL    |                |
+| chinese    | int(50)      | YES  |     | NULL    |                |
+| math       | int(50)      | YES  |     | NULL    |                |
+| salary     | int(50)      | YES  |     | NULL    |                |
++------------+--------------+------+-----+---------+----------------+
+
+<五> SQL 基本概念
+1.  SQL功能划分:
+        DDL数据定义语言: 用来定义数据库对象: 创建库, 表, 列等.
+        DML数据操作语言: 用来操作数据库表中的记录.
+        DQL数据查询语言: 用来查询数据.
+        DCL数据控制语言: 用来定义访问权限和安全级别.
+    1.1 DDL
+        创建数据库 create database xxx(数据库名) character set utf8(编码格式);
+        展示有多少数据库 show databases;
+        进入数据库对应的数据库 use xxx(数据库名);
+        创建表  例如: CREATE TABLE students (id int, name varchar(25), age int, email varchar(255));
+        修改表名 RENAME TABLE 原始表名 TO 新表名;
+        查看表的创建细节: SHOW CREATE TABLE 表名;
+        修改表的字符集(假如为gbk) ALTER TABLE 表名 CHARACTER SET 字符集名称(假如为gbk);
+        给表添加一个主键约束 ALTER TABLE 表名 ADD CONSTRAINT PRiMARY KEY(字段)
+
+        给表添加一个新列 ALTER TABLE 表名 ADD 列名 数据类型;
+                      举例: ALTER TABLE students ADD score int;
+        修改表中的列名  ALTER TABLE 表名 原始列名 新列名 数据类型;           
+        修改表中列名对应字段的类型  ALTER TABLE 表名 MODIFY 列名 数据类型;
+        删除表中的某一列   ALTER TABLE 表名 DROP 列名;
+        展示对应数据库下有多少个表格 show tables;
+        查看表下面有多少字段 desc xxx(表名)
+        删除表 DROP TABLE 表名;
+
+    1.2 DML
+        查询表中的所有数据 SELECT * FROM 表名 (表格形式展示);
+                        SELECT * FROM 表名\G (列表形式展示);
+        插入数据: INSERT INTO 表名 (列名1, 列名2) VALUES (列值1,列值2);
+                例如: 可以批量插入:
+                INSERT INTO stu  (id,name,age,email) VALUES 
+                    (1,'hangzhou',12,'88881'),
+                    (1,'hangzhou',12,'88881'),
+                    (3,'wuhan',190,'8710');
+        更新数据: UPDATE 表名 SET 列名1=列值1, 列名2=列值2 WHERE 列名=列值;
+                例如:
+                    update stu set score=90; stu 表中所有分数都修改为90;
+                    update stu set score=88 where name='Tom'; stu 表中Tom分数都修改为88;
+                    update stu set score=100,age=24 where name='Tom'; stu 表中Tom分数都修改为88,年龄修改为24;
+                    update stu set age=age+1 where name='Tom'; stu 表中Tom年龄增加1;
+        删除数据:   DELETE FROM 表名 WHERE 列名=列值;
+                   TRUNCATE TABLE 表名;  清空表
+                DELETE 与 TRUNCATE区别:
+                a. DELETE删除表中的数据,表结构还在; 删除后的数据还可以找回;
+                b. TRUNCATE删除是把表drop掉, 然后再创建一个同样的新表. 删除的数据不能找回, 执行速度比DELETE快.
+
+    1.3 DQL
+        查询所有列  SELECT * FROM 表名;
+        结果集:  a. 数据库执行DQL语句不会对数据进行改变, 而是让数据库发送结果集给客户端.
+                b. 通过查询语句查询出来的数据以表的形式展示, 我们称这个表为虚拟结果集,放在内存中.
+                   查询返回的结果是一张虚拟表
+        查询指定的列: SELECT 列值1,列值2 FROM 表名;
+                    例如: SELECT name, age FROM stu; 
+        条件查询: 条件查询就是在查询时给出WHERE子句, 在WHERE中可以使用一些运算符及关键字
+                条件查询运算符及关键字: =(等于), !=(不等于), <>(不等于), <(小于), <=(小于等于), >(大于), >=(大于等于)
+                                    BETWEEN...AND; 值在什么范围内;
+                                    IN(set); 固定的范围值
+                                    IS NULL(为空); 
+                                    IS NOT NULL(不为空); 
+                                    AND(与);
+                                    OR(或);
+                                    NOT(非);
+                条件查询举例说明:
+                1. 查询性别为男, 并且年龄为20的学生的记录;
+                    SELECT * FROM stu WHERE gender='男' AND age = 20;
+                2. 查询学号为1001, 或者名字为Tom的记录;
+                    SELECT * FROM stu WHERE id=1001 OR name = 'Tom';
+                3. 查询学号为1001,1002,1003的记录;
+                    SELECT * FROM stu WHERE id = 1001 OR id = 1002 OR id = 1003;
+                    SELECT * FROM STU WHERE id in(1001,1002,1003);
+                4. 查询年龄为NULL的记录;
+                    SELECT * FROM stu WHERE age IS NULL;
+                5. 查询年龄在18到20之间的学生的记录;
+                    SELECT * FROM stu WHERE age>=18 AND age<=20;
+                    SELECT * FROM stu WHERE age BETWEEN 18 AND 80;(包括边界值);
+                6. 查询性别非男的学生的记录;
+                    SELECT * FROM stu WHERE gender != '男';
+                7. 查询姓名不为NULL的学生的记录;
+                    SELECT * FROM stu WHERE name IS NOT NULL;
+
+    1.4 模糊查询 a. 使用指定的关键字进行查询
+                b. 使用LIKE关键字后跟通配符查询
+                   通配符分为: _(任意一个字符)
+                             %(任意0-n个字符)
+                举例说明:
+                查询姓名由5个字母构成的学生记录
+                    SELECT * FROM stu WHERE name LIKE '_____'; (5个下划线)
+                    SELECT name,age FROM stu WHERE name LIKE '_____'; (5个下划线) 只展示name,age列表
+                查询姓名由5个字母构成的记录,并且第五个字母为‘s’的学生记录
+                    SELECT * FROM stu WHERE name LIKE '____s';
+                查询姓名以字母‘m’开头的学生记录
+                    SELECT * FROM stu WHERE name LIKE 'm%';
+                查询姓名中第二个字母为‘o’的学生记录
+                    SELECT * FROM stu WHERE name LIKE '_o%';
+                查询姓名中包含‘s’字母的学生记录
+                    SELECT * FROM stu WHERE name LIKE '%s%';
+
+    1.5 字段控制查询 a. 去除重复记录
+                   b. 把查询字段的结果进行运算,必须都是整数型,分类:
+                        1. SELECT *,字段1+字段2 FROM 表名;
+                        2. 列表中很多值端为NULL,因为任何东西与NULL相加结果还是NULL,所以结算结果可能是NULL,
+                           下面使用了把NULL转换成0的函数IFNULL;
+                           SELECT *,IFNULL(chinese,100)+IFNULL(math,2) FROM stu;
+
+                   c. 
+                举例说明:
+                查询表中所有name字段, 要求去重
+                    SELECT DISTINCT name FROM stu; (重点关键字 DISTINCT)
+                查询求和, 语文和数学,用IFNULL函数, 如果数据库中没有分数记录,用0代替
+                    SELECT *,IFNULL(chinese,0)+IFNULL(math,0) FROM stu;
+                查询时, 对上一个例子 IFNULL(chinese,0)+IFNULL(math,0)用别用代替
+                    SELECT *,IFNULL(chinese,0)+IFNULL(math,0) as total FROM stu;
+                对查询的name表起一个别名
+                    SELECT name as resName FROM stu;
+
+    1.6 排序 关键字是 ORDER BY
+            排序分为:升序 ASC 从小大大, 默认
+                    降序 DESC 从大到小
+            举例说明(例子中热门是生序):
+            对语文成绩进行排序
+                SELECT * FROM stu ORDER BY chinese;
+            对语文成绩进行排序, 如果语文成绩相同,以id来排序
+                SELECT * FROM stu ORDER BY chinese, id ASC;
+            对语文成绩进行降序排序
+                SELECT * FROM stu ORDER BY chinese DESC;
+            对语文和数学成绩求和用别名total进行排序
+                SELECT *,IFNULL(chinese,0)+IFNULL(math,0) as total FROM stu ORDER BY total;
+
+    1.7 聚合函数 对查询的结果进行统计计算, 常用聚合函数分为以下几种:
+            COUNT(): 统计指定列不为NULL的记录行数;
+            MAX(): 计算指定列的最大值, 如果指定列是字符串类型,那么使用字符串排序运算;
+            MING: 计算指定列的最小值, 如果指定列是字符串类型,那么使用字符串排序运算;
+            SUM(): 计算指定列的数值和, 如果指定列类型不是数值类型, 那么计算结果为0;
+            AVG(): 计算指定列的陪君子, 如果指定列类型不是数值类型,那么计算结果为0.
+            举例说明:
+                查询stu表中有多少记录
+                    SELECT COUNT(*) as total FROM stu; 用别名来代替, 以此返回给前端
+                查询stu表中语文成绩一共有多少个
+                    SELECT COUNT(chinese) as total FROM stu;
+                    备注: 语文成绩为NULL的没有统计
+                查询stu表中语文成绩大于60的人数
+                    SELECT COUNT(*) FROM stu WHERE chinese>60;
+                查询stu表中语文和数学成绩和大于120的人数, 并且求和数值用别名total来代替, 返回给前端
+                    SELECT * ,(IFNULL(chinese,0) + IFNULL(math,0)) as total FROM stu WHERE (IFNULL(chinese,0) + IFNULL(math,0)) >= 120;
+                查询stu表中语文个数, 数学个数
+                    SELECT COUNT(chinese) as chineseTotal, COUNT(math) as mathTotal FROM stu;
+                查询stu表中全班语文的分数总和
+                    SELECT SUM(chinese) FROM stu;
+                查询stu表中全班语文和数学的分数总和
+                    SELECT SUM(IFNULL(chinese,0)+IFNULL(math,0)) as allTotal FROM stu;
+                分别查询stu表中语文分数和, 数学分数和
+                    SELECT SUM(IFNULL(chinese,0)) as chineseTotal, SUM(IFNULL(math,0)) as mathTotal FROM stu;
+                查询表中stu全班语文的平均分数
+                    SELECT avg(chinese) FROM stu;
+                查询表中stu全班语文和数学的平均分数
+                    SELECT AVG(IFNULL(chinese,0)+IFNULL(math,0)) as allTotal FROM stu;
+                查询表中stu语文的最高分数,最低分数
+                    SELECT MAX(chinese) as maxChinese, MIN(chinese) as minChinese FROM stu;
+    
+    1.8 分组查询
+        a. 将查询结果按照一个或多个字段进行分组,字段值相同的同为一组, 举例:
+            SELECT gender FROM stu GROUP BY gender;
+            根据gender字段来分组,gender字段的全部值只有两个(‘男’和‘女’),所以分为了两组
+            当GROUP BY单独使用时,只显示每组的第一条记录
+            所以GROUP BY单独使用时的实际意义不大
+            备注: 区别 DISTINCT 去重
+        b. 使用GROUP BY,配合GROUP_CONCAT,来展示分组里面对应的各个名字
+            查询部门分组有哪些人
+                SELECT department,GROUP_CONCAT(`name`) FROM stu GROUP BY department;
+            查询性别分组有哪些人
+                SELECT gender,GROUP_CONCAT(`name`) FROM stu GROUP BY gender;
+            查询性别分组有哪些人,其中名字用别名
+                SELECT gender,GROUP_CONCAT(`name`) as resName FROM stu GROUP BY gender;
+            备注: 包含name字段是 ` ; es6字符扩展
+        c. GROUP BY配合聚合函数
+            查询男,女生语文成绩的分数列, 总分数, 平均分数
+                SELECT gender, GROUP_CONCAT(chinese),SUM(chinese) ,AVG(chinese) FROM stu GROUP BY gender;
+            查询每个部门的部门名称和每个部门的工资和
+                SELECT department, GROUP_CONCAT(salary),SUM(salary) FROM stu GROUP BY department;
+            查询每个部门的部门名称及部门人数个数
+                SELECT department, GROUP_CONCAT(`name`), COUNT(*) FROM stu GROUP BY department;
+            查询每个部门的部门名称以及每个工资大于6000的人数
+                SELECT department, GROUP_CONCAT(salary),COUNT(*) FROM stu WHERE salary>6000 GROUP BY department;
+        d. GROUP BY + having
+            d.1 用来分组查询后指定一些条件来输出查询结构;
+            d.2 having和where一样, 但是having只能用于GROUP BY;
+                having主要应用于满足条件的筛选出来
+                两者区别:
+                    区别1:
+                        having是在分组后对数据进行筛选
+                        where是在分组前对数据进行筛选
+                    区别2:
+                        having后面可以使用女组统计函数
+                        where后面不可以使用函数
+                    区别3:
+                        where是对分组前记录的条件,如果某行记录满足where子句的条件,那么这行记录不会参加分组
+                        having是对分组后数据的约束
+                举例说明
+                查询工资总合大于8000的部门名称以及工资和
+                    SELECT department,sum(salary) FROM stu GROUP BY  department HAVING SUM(salary) > 8000;
+                查询工资大于4000, 工资总和大于8000的部门名称以及工资和
+                    SELECT department, GROUP_CONCAT(salary), SUM(salary) FROM stu WHERE salary>4000 GROUP BY department HAVING SUM(salary) > 8000;
+                    对此举例拆分说明:
+                    1. 查询工资大于4000
+                        SELECT salary FROM stu WHERE salary>4000;
+                    2. 以部门来分组工资大于4000
+                        SELECT department FROM stu WHERE salary>4000 GROUP BY department;
+                    3. 以部门来分组工资大于4000, 并且展示部门名称和工资数目
+                        SELECT department,GROUP_CONCAT(salary) FROM stu WHERE salary>4000 GROUP BY department;
+                    4. 以部门来分组工资大于4000, 并且展示部门名称和工资数目, 再次展示工资总和
+                        SELECT department,GROUP_CONCAT(salary),SUM(salary) FROM stu WHERE salary>4000 GROUP BY department;
+                    5. 最终,对分组的数组用having筛选
+                        SELECT department, GROUP_CONCAT(salary), SUM(salary) FROM stu 
+                        WHERE salary>4000 
+                        GROUP BY department 
+                        HAVING SUM(salary) > 8000;
+                    6. 对以上求和进行降序排列
+                        SELECT department,GROUP_CONCAT(salary),SUM(salary) FROM stu
+                        WHERE salary>4000 
+                        GROUP BY department
+                        HAVING SUM(salary) > 8000 
+                        ORDER BY SUM(salary) DESC;
+            d.3 书写查询
+                SELECT --> FROM --> WHERE --> GROUP BY --> HAVING --> ORDER BY --> LIMIT
+            d.4 执行顺序
+                FROM --> WHERE --> GROUP BY --> HAVING --> SELECT --> ORDER BY --> LIMIT
+                执行过程: 
+                    1. FROM --> WHERE 先从某个表里面找指定条件的数据
+                    2. 找到数据之后对数据 GROUP BY 进行分组
+                    3. 对分组之后 HAVING 的再进行分组
+                    4. 对数据进行 ORDER BY 排序
+                    5. 对数据进行 LIMIT 限制
+            d.5 LIMIT
+                LIMIT 4; 一次性查询4条数据返回
+                LIMIT 0,4; 从第一条数据可是查询, 查询4条数据返回
+                分页处理
+                    SELECT * FROM 表名 LIMIT (currentpage-1)*pageSize,pageSize;
+            
+    1.9 实体完整性
+        约束类型:
+            主键约束: primary Key
+                主键约束特点:
+                    a. 每个表中要有一个主键
+                    b. 数据唯一,且不能为null
+                添加方式:
+                    CREATE TABLE 表名 (字段名1 数据类型1 primary Key, 字段名2, 数据类型2);
+                    CREATE TABLE 表名 (字段名1 数据类型1, 字段名2 数据类型2 , primary Key(要设置的主键字段名))
+                    CREATE TABLE 表名 (字段名1 数据类型1, 字段名2 数据类型2, 字段名3 数据类型3, primary Key(字段1, 字段2))
+            唯一约束: unique
+                a. 指定列的数据不能重复
+                b. 可以为空值
+                添加方式
+                    CREATE TABLE 表名 (字段名1 数据类型1 unique, 字段名2, 数据类型2);
+            自动增长列: auto_increment
+                添加方式
+                    CREATE TABLE 表名 (字段名1 数据类型1 auto_increment, 字段名2, 数据类型2);
+    
+    1.10 参照完整性, 关联表
+        什么是参照完整性:
+            a. 是指表与表之间的一种对应关系
+            b. 通常情况下以通过设置两表之间的主键, 外键关系, 或者编写两表之间的触发器来实现.
+                备注: 有对应参照完整性的两张表格,在对他们进行数据插入, 更新, 删除的过程中, 系统都会
+                将被修改表格与另一张对应表格进行对照, 从而阻止一些不正确的数据操作.
+        数据库的主键和外键类型一定要一致
+        两个表必须得要是InnDB类型
+        设置完整参照性后,主键当中的内值, 必须得是主键当中的内容
+        一个表设置当中的字段设置为主键, 设置主键的为主表
+        举例说明:  
+            stu_01 与 score_01 两张表相关联, score_01中sid设置外键,对应表stu_01中的id
+            创建表命令
+                CREATE TABLE stu_01 (
+                    id int PRIMARY KEY, name VARCHAR(50), age int
+                );
+                CREATE TABLE score_01 (
+                    sid int,
+                    score int,
+                    CONSTRAINT sc_stu_fk FOREIGN KEY (sid) REFERENCES stu_01(id)
+                );
+            修改表的关联
+                ALTER TABLE score_01 ADD CONSTRAINT sc_stu_fk FOREIGN KEY(sid) REFERENCES stu_01(id);
+            备注: 也就是sid是学生的编号, 在stu_01中只存储一次学生名字, 后期容易表都只存储学生编号, 和stu_01关联起来即可.
+            人员登记表
+            +----+-------+------+
+            | id | name  | age  |
+            +----+-------+------+
+            |  1 | Tom   |   18 |
+            |  2 | Hello |   21 |
+            |  3 | Yhan  |   19 |
+            +----+-------+------+
+
+            分数表格 km=科目
+            +----+-------+--------+------+          
+            | id | score | km     | sid  |
+            +----+-------+--------+------+
+            |  1 |    90 | 语文   |    1 |
+            |  2 |    85 | 数学   |    1 |
+            |  3 |    92 | 英文   |    2 |
+            |  4 |    87 | 数学   |    3 |
+            +----+-------+--------+------+
+    
+    1.11 多表查询
+        1.11.1 表之间关系:
+            一对一  一夫一妻
+            一对多  (学生表 分数表) (一个人可以拥有多张表)
+                    举例说明: 创建人 对应 汽车 (一个人可以有多辆汽车)
+                        CREATE TABLE person (
+                            id int PRIMARY KEY auto_increment, 
+                            name VARCHAR(50)
+                        );
+                        CREATE TABLE car(
+                            pid int,
+                            name VARCHAR(50),
+                            color VARCHAR(50),
+                            CONSTRAINT person_car FOREIGN KEY (pid) REFERENCES person(id)
+                        );
+            多对多  课程 一个学生可以选择多门课程,每个课程也可以有多个学生选择
+                   一个老师可以选择多个学生, 一个学生也可以选择多个老师
+                    举例说明:
+                        a. 创建老师表
+                            CREATE TABLE teacher (
+                            	tid int PRIMARY KEY auto_increment,
+                                name VARCHAR(50),
+                                age int,
+                                gender CHAR(1) DEFAULT '男'
+                            ); 
+                        b. 创建学生表
+                            CREATE TABLE t_student (
+                                sid int PRIMARY KEY auto_increment,
+                                name VARCHAR(50) NOT NULL,
+                                age int,
+                                gender CHAR(1) DEFAULT '男'
+                            )
+                        c. 创建老师与学生关系表
+                            CREATE TABLE tea_stu_rel (
+                            	tid int,
+                                sid int
+                            );
+                        d. 添加外键
+                            ALTER TABLE tea_stu_rel ADD CONSTRAINT FOREIGN KEY(tid) REFERENCES teacher(tid);
+                            ALTER TABLE tea_stu_rel ADD CONSTRAINT FOREIGN KEY(sid) REFERENCES t_student(sid);
+            为什么要拆分表: 避免大量冗余数据出现
+
+        1.11.2多表查询
+            什么是合并结果集: 合并结果就是把两个 SELECT 语句查询的结果合并在一起
+            合并结果的两种方式:
+                        a. UNION 合并时去除重复记录
+                        b. UNION ALL 合并时不去除重复记录
+            
+            书写格式:
+                SELECT * FROM 表名1 UNION SELECT * FROM 表名2;
+                SELECT * FROM 表名1 UNION ALL SELECT * FROM 表名2;
+	1.11.3 连接查询
+	    笛卡尔积现象，右边数据以此对应左边数据
+	    九九写法 SELECT * FROM stu AS s, score AS sc WHERE s.sid = sc.sid;
+	    内连接  SELECT * FROM stu as s INNER JOIN score as sc ON s.sid = sc.sid WHERE sc.score > 90;
+	    外连接  LEFT JOIN & RIGHT JOIN
+	    自然连接 SELECT * FROM stu NATURAL JOIN score;
+	1.11.4 子查询
+	    什么是子查询： 一个SELECT语句中包含另一个完整的SELECT语句。 或者两个以上SELECT语句，就是子查询
+	    子查询的位置 	a. WHERE后，把SELECT查询出来的结果当做另一个SELECT的条件值
+		        b. FROM后，把查询出来的结果当做一个新表
+	    举例说明：
+		查询与项羽同一个部门的人
+		    SELECT * FROM emp WHERE deptno = ( SELECT deptno FROM emp WHERE ename = "项羽" );
+		查询30号部门薪资大于2000的所有人
+		    SELECT ename,salary FROM (SELECT ename,salary,deptno from emp WHERE deptno= 30) AS s WHERE s.salary > 2000;
+		查询工资高于程咬金的员工
+		    a. 查询程咬金的工资
+    		    b. 再去根据查询的结果查询大于该值得员工
+		    SELECT ename,salary FROM emp WHERE salary > (SELECT salary FROM emp WHERE ename = '程咬金');
+		查询工资高于30号部门所有员工信息
+		    a. 查询30号部门工资最高的那个人
+		    b. 再到表中查询所有员工信息
+		    SELECT ename, salary from emp WHERE salary > (SELECT MAX(salary) FROM emp WHERE deptno = 30);
+		查询工作与工资与妲己完全相同的员工信息
+		    a. IN写法
+		    SELECT * FROM emp WHERE (job, salary) IN (SELECT job, salary FROM emp WHERE ename = '妲己');
+		    b. 九九写法
+		    SELECT * FROM emp AS e, (SELECT job,salary FROM emp WHERE ename = '妲己') AS r WHERE e.job = r.job AND e.salary = r.salary;
+		    c. 内连接写法
+		    SELECT * FROM emp AS e INNER JOIN (SELECT job, salary FROM emp WHERE ename = "妲己") AS r ON e.job = r.job AND e.salary = r.salary;
+		查询有两个以上直接下属的员工信息
+		    a. 对数据进行分组，查询有两个员工信息的人
+		    SELECT mgr, GROUP_CONCAT(mgr) AS number, COUNT(mgr) from emp GROUP BY mgr HAVING COUNT(mgr) >= 2;
+			备注： GROUP_CONCAT 分组归类
+		    b. 对查询数据进行 IN 筛选
+		    SELECT * FROM emp WHERE empno in (SELECT mgr from emp GROUP BY mgr HAVING COUNT(mgr) >= 2);
+		查询员工7788的员工名称，员工工资，部门名称，部门地址
+		    SELECT e.ename, e.salary, d.dname, d.`local` FROM emp AS e, dept as d WHERE e.deptno = d.deptno AND e.empno = 7788;
+	1.11.5 自连接（自己连接自己，起别名）
+	    举例说明
+		查询员工7369员工编号，姓名，经理编号， 经理姓名
+		SELECT e1.empno, e1.ename, e2.mgr, e2.ename AS jl_ename FROM emp AS e1, emp AS e2 WHERE e1.mgr = e2.empno AND e1.empno = 7369;
+
+	1.12 SQL进阶部分
+	    1.12.1 SQL中常用函数
+		事先提供好的一些功能可以直接使用， 函数可以用在SElECT语句 及其子句， 也可以使用在DELETE， UPDATE语句中。
+		函数分类：
+			字符串函数
+			数值函数
+			日期和时间函数
+			流程函数
+			其他函数
+		学习地址： http://www.cnblogs.com/progor/p/8832663.html
+		1.12.1.1 字符串函数
+		    concat(str1, str2, ...) 将传入的字符串连接成一个新的字符串， 任何字符与null进行连接结果都是null
+		    insert(str, x, y, instr) 将字符串str 从x位置开始， y个字符长的字符替换为指定的字符
+			例子： SELECT INSERT("abcdef", 1, 3, "t");  // tdef
+		    lower(str) 
+		    upper(str)
+		    left(str,x) 从左截取字符串
+		    right(str,x) 从右截取字符串
+		    LPAD(str, number, newStr) 从左填充字符串
+		    RPAD(str, number, newStr) 从右填充字符串
+		    LTRIM(str) 去掉左边空格
+		    RTRIM(str) 去掉右边空格
+		    TRIM(str) 去掉左右空格
+		    REPEST(str, number) 重复多少次
+		    REPLACE(str, x, y) 替换字符串 	 SELECT REPLACE("abcdef","a","UUU");  // UUUbcdef
+		    SUBSTRINT(str, x, y) 截取字符串
+		1.12.1.2 数值函数
+		    ABS(x) 绝对值， 
+		    CEIL(x) 小数不为零部分上取整， 即向上取最接近的整数  SELECT CEIL(1.1); // 2 		SELECT CEIL(-1.1); // -1
+		    FLOOR(x)  小数不为零部分下取整
+		    MOD(x, y)  求模
+		    RAND() 返回0~1的随机值
+		1.12.1.3 日期相关函数
+		    CURDATE()	返回当前日期， 只包含年月日
+		    CURTIME()	返回当前时间， 只包含时分秒
+		    NOW()	返回当前日期和时间， 年月日时分秒都包含
+		    UNIX_TIMESTAMP() 	返回当前日期的时间戳
+		    FROM_UNIXTIME() 	把时间戳转换成日期
+		    WEEK()	
+		    YEAR()
+		    HOUR()
+		    MINUTE()
+		    DATE_FORMAT()	
+		    DATE_ADD()    给定的时间上增加或者减少多少时间	SELECT DATE_ADD(NOW(), INTERVAL 3 YEAR);
+		    DATEDIFF()	  两个时间之间相差不多少天	SELECT DATEDIFF("2019-02-05",NOW());
+		1.12.1.4 流程函数&其他函数
+		   IF(value, t,f) 如果value为真，返回t， 否则返回f	SELECT IF((SELECT salary FROM emp WHERE ename = '李白') > 5000,'经理', '员工')
+	 	   IFNULL(value, t, f) 如果value不为空，返回t， 否则返回f
+		   CASE WHEN THEN END		SELECT CASE WHEN 2 > 3 THEN 'hello world' ELSE 'nice to meet you' END;
+		   其他常用函数
+		   DATABASE() 当前数据库表名
+		   VERSION()  当前数据库版本号
+		   USER()     当前登录用户名
+		   PASSWORD(str) 密码
+		   MD5()
+	    1.12.2 事务
+		1.12.2.1
+		    什么是事务，不可分割的操作，假设该操作有ABCD四个步骤组成： 如ABCD四个步骤完成，则完成， 如果有一步失败，则认为事务失败
+		    每条sql语句都是一个事务
+		    事务只对DML语句有效，删除更新操作，对DQL无效
+		1.12.2.2 事务的ACID
+		    原子性是指事务包含的所有操作要么全部成功，要么全部失败回滚
+		    一致性是指事务必须是数据库从一个一致性状态变换到另一个一致性状态，也就是说一个事务执行之前和执行之后都必须处于一致性状态， 让数据保持一定上的合理，
+			比如: 一个商品出库时，仓库数量减1， 对应购物车中商品数量增加1
+		    隔离性
+		    持久性
+		1.12.2.3 事务的使用
+		    事务开启：START TRANSACTION;
+		    事务提交：COMMIT; 所有语句全部执行完毕，没有发生异常提交事务，更新到数据库中。
+		    举例说明： 张三账户减2000， 李四账户增2000
+			START TRANSACTION;
+			UPDATE zs_count SET money=money-2000;
+			UPDATE ls_count set money=money+2000;
+			COMMIT;
+		    事务回顾：ROLLBACK 回滚
+		    事务并发问题：	并发：多人同时做某一件事情
+			脏读： 举例说明：老板要给程序员发工资，程序员的工资是3.6万/月，但是发工资时老爸不小心按错了数字，按成3.9万/月，该钱已经到达程序员的账户，但是事务还没与提交，就在这时，程序员去查看自己的工资，发现比往常涨了3千，以为涨了工资非常高心。 但是老板及时发现了不对，马上回滚将数字改成3.6万再提交。
+			    实际程序员这个月的工资还是3.6万， 但是程序员看到的是3.9万。 他看到的是老板还没提交事务的数据，这就是脏读。
+			    解决办法： READ COMMIT; 读提交， 可以解决脏读问题
+			不可重复读：举例说明: 程序员拿着工资卡(卡里当然只有3.6万)， 当他买单时(程序员事务开启)， 收费系统事先检测到他的卡里只有3.6万，就在这个时候，程序员的妻子要把钱全部转出去充当家用，并提交，当收费系统准备扣款时，再检测卡里的金额为0了，
+				一个事务范围内两个相同的查询却返回了不同数据，这就是不可重复读
+				解决办法: REPEATABLE READ
+			重复读：  事务开启时，不允许其他事务UPDATE操作。
+			幻读： 举例说明：程序员某一天去消费，花了2千元，然后他的妻子去查看他今天的消费记录，（妻子事务开启），看到确实是花了2千元，就在这个时候，程序员花了1万买了一部电脑，即新增INSERT了一条记录，并提交。 当妻子打印程序员的消费记录时，（妻子事务提交），发现花了1.2万元， 似乎出现了幻觉， 这就是幻读。
+				解决办法： SERIALIZABLE
+				但是这种事务隔离级别效率地下，比较消耗数据库性能，一般不适用。
+			对应关系：
+		    事务隔离级别： 低版本 < 5.7 SELECT @@GLOBAL.tx_isolation, @@tx_isolation;
+				> 5.7	
+		    	READ UNCOMMITTED 	就是一个事务可以读取另一个未提交事务的数据（脏读）
+			READ COMMITTE		一个事务要等到另一个事务提交之后才可以读取数据
+			REPEATABLE READ
+			SERIALIZABLE    
+		
+		1.12.4 MYSQL权限
+		    增加用户       CREATE USER 'laoyu'@'localhost'	IDENTIFIED by '123456';
+		    查看权限	 SHOW GRANTS
+		    查看指定用户权限	SHOW GRANTS FOR root@localhost
+		    修改权限	拥有所有权限，并能继续授予权限 GRANT ALL PRIVILEGES on "*" TO laoyu@localhost IDENTIFIED BY '123456' WITH GRANT OPTION;
+				刷新数据库   FLUSH PRIVILEGES; 
+				创建对指定数据库所有权限 GRANT ALL PRIVILEGES ON (数据库名).* TO laoyu@localhost IDENTIFIED BY '123456' WITH GRANT OPTION;
+				创建一个laoyu用户只能对stu表进行CRUD操作权限. GRANT INSERT,UPDATE,SELECT,DELETE ON (数据库名).stu TO PRIVILEGES@loaclhost INSENSITIVE BY '123456';
+		    删除权限	REVOKE 权限 ON 数据库对象 FROM 用户;
+    1.13 视图
+        1.13.1 什么是视图
+            视图是一个虚拟表, 其内容由查询定义
+            同真实的表一样, 视图包含一系列带有名称的列和行数据
+            行和列数据来自定义视图的查询所引用的表, 并在引用视图时动态生成.
+            简单来说视图就是由select结果组成的表
+        1.13.2 视图的特性
+            视图是对若干张基本表的引用, 一张虚拟表, 查询语句执行的结果, 不存储具体的数据(基本表发生了改变,视图也会跟着改变)
+            可以跟基本表一样, 进行增删改查操作
+        1.13.3 视图的作用
+            安全性: a. 创建一个视图,定义好该视图所操作的数据, 之后将用户权限与视图绑定,这样的方式是使用到了一个特性,grant语句可以针对视图进行授权操作.
+            查询性能提高
+            提高数据的独立性
+        1.13.4 
+            创建视图 CREATE VIEW emp_salary AS (SELECT * FROM emp WHERE salary > 2000);
+            替换原来视图  CREATE OR REPLACE VIEW emp_salary AS (SELECT * FROM emp WHERE salary > 2000);
+            删除视图  DROP VIEW emp_salary;
+            ALGORITHM参数: merge 处理方式替换式, 可以进行更新真实表中的数据
+                          TEMPTABLE 具化式,由于数据存储在临时表中, 所以不可以进行更新操作, 没有定义ALGORITHM参数
+                          UNDEFINED 没有定义ALGORITHM参数
+                                    mysql更倾向于选择替换式,是因为他更加有效
+                        举例说明: CREATE ALGORITHM=MERGE VIEW AS (SELECT * FROM emp WHERE salary > 2000);
+            WITH CHECK OPTION 更新数据时不能插入或更新不符合视图限制条件的记录
+            LOCAL 和 CASCADED 决定了检查的测试范围, 默认值为CASCADED
+
+        1.13.5
+            视图机制: 替换式, 操作视图时, 试图名直接被视图定义给替换
+                    具化式, mysql先得到了视图执行的结果, 该结果形成一个中间结果暂时存在内存中, 外面select语句就调用了这些中间结果(临时表)
+                    替换式和具化式的区别: 
+                                    替换式: 将试图公式替换后, 当成一个整体sql进行处理
+                                    具化式, 先处理视图结果, 后处理外面的查询需求
+        1.13.6 
+            视图不可更新部分
+                聚合函数
+                DISTINCT关键字
+                GROUP BY 子句
+                having 子句
+                UNION 运算符
+                FROM 子句中包含多个表 
+                SELECT 语句中引用了不可更新视图
+                只要视图当中的数据不是来自基表, 就不能够直接修改
+    1.14 存储过程
+        1.14.1 
+            什么是存储过程, 一组可编程的函数, 是为了完成特定功能的sql语句集.
+                存储过程就是具有名字的一段代码, 用来完成一个特定的功能, 创建的存储过程中保存在数据库的数据字典中.
+            为什么要用存储过程
+                将重复性很高的一些操作, 封装到一个存储过程,简化了对这些sql的调用
+                批量处理
+                统一接口,确保数据的安全
+                相对于oracle数据库来讲, mysql的存储过程相对功能较弱,使用较少
+            存储过程的创建和使用
+                DELIMITER $$ 
+                    它与存储过程语法无关;
+                    DELIMITER语句将标准分隔符 - 分号(;) 更改为 $$
+                    因为我们想将存储过程作为整体传递给服务器,而不是让mysql工具一次解释每个语句.
+                    解释: 告诉mysql解释器, 该段命令是否已经结束了, mysql是否可以执行了. 默认情况下, DELIMITER是分号. 
+                        在命令客户端中,如果有一行命令以分号结束, 那么回车后, mysql将回执行命令, 但是有时候, 不希望msyql这么做,
+                        在为可能输入较多的语句且语句中包含分号, 使用DELIMITER $$, 这样只有当$$出现之后, mysql解释器才会执行这段语句.
+                创建存储过程
+                    CREATE PROCEDURE 名称()
+                        BEGIN  
+                            语句
+                        END $$
+                    举例说明:
+                        DELIMITER $$
+                        CREATE PROCEDURE show_books()
+                        BEGIN
+                        SELECT * FROM books;
+                        END $$
+                        DELIMITER ;
+                    调用存储过程: 这样在查询时就可以直接使用 CALL show_books;     // 这个过程存储在 数据库字典中
+                查看存储过程: 
+                    SHOW PROCEDURE STATUS;
+                查看指定数据库存储过程:
+                    SHOW PROCEDURE STATUS WHERE db='blog'; // blog为指定数据库名称
+                查看存储源码
+                    SHOW CREATE PROCEDURE show_books;
+                删除存储过程
+                    DROP PROCEDURE show_books;
+            存储过程变量
+                在存储过程中声明一个变量
+                使用DECLARE语句, DECLARE变量名, 数据类型大小 DEFAULT 默认值
+                比如: 可以声明一个 total_sale 的变量, 数据类型为 INT 类型, 默认值为0, DECLARE total_sale INT DEFAULT 0;
+                声明共享相同数据类型的两个变量或多个变量语句 DECLARE x,y int DEFAULT 0
+                举例说明:
+                    DELIMITER $$
+                    CREATE PROCEDURE test()
+                    BEGIN
+                        --声明变量
+                    DECLARE res VARCHAR(255) DEFAULT '0'
+                    DECLARE x,y int DEFAULT 0
+                    SELECT AVG(salary ) FROM emp;
+                    END $$
+                    DELIMITER
+                分配变量值 
+                    要为变量分配一个值, 可以使用SET语句
+                    使用 SELECT INTO 语句将查询的结果分配给一个变量
+                    举例说明:
+                        SET x = 3;
+                        SET y = 4;
+                        DECLARE avgRes DOUBLE DEFAULT 0;
+                        SELECT AVG(salary) INTO avgRes from emp;
+            存储过程参数
+                例子1: 根据传入的名称, 获取对应的信息
+                    DELIMITER $$
+                    CREATE PROCEDURE getName(IN name VARCHAR(255))
+                    BEGIN 
+                    SELECT * FROM books WHERE name = name;
+                    END $$
+                    DELIMITER ;
+                        使用: CALL getName("HTML5"); 
+                例子2:
+                    DELIMITER $$
+                    CREATE PROCEDURE getReid(IN id INT, OUT _id INT)
+                    BEGIN
+                    SELECT genreid INTO _id from books WHERE id = id;
+                    END $$
+                    DELIMITER ;
+                    使用:
+                    CALL getReid(2, @_id);
+                    SELECT @_id FROM DUAL;    //DUAL是虚拟表
+                例子3:
+                    DELIMITER $$
+                    CREATE	PROCEDURE test02(INOUT num INT, in inc INT)
+                    BEGIN 
+                    SET num = num + inc;
+                    END $$
+                    DELIMITER ;
+                    使用:
+                    SET @num1 = 20;
+                    CALL test02(@num1, 10);
+                    SELECT @num1 AS number; // 30
+                三种类型
+                    IN  输入参数
+                    OUT 输出参数
+                    INOUt
+                定义参数
+            存储过程语句
+                IF
+                    方法1:
+                    IF expression THEN
+                        statements1;
+                    END IF
+                    方法2:
+                    IF expression THEN
+                        statements1;
+                    ELSE
+                        statements2;
+                    END IF
+                CASE
+                    方法:
+                    CASE case_expression
+                        WHEN when_expession_01 THEN commands_01;
+                        WHEN when_expession_02 THEN commands_02;
+                        ...
+                        ELSE commands_default
+                循环
+                    方法1:
+                        WHILE expression DO
+                            statements;
+                        END WHILE
+                    方法2:
+                        REPEAT
+                            statements;
+                        UNTIL expression;
+                        END REPEAT
+            自定义函数
+                举例说明1:
+                    随机生产一个指定个数的字符串
+                    DELIMITER $$
+                    CREATE FUNCTION rand_strs(n int) RETURNS VARCHAR(255)
+                    BEGIN 
+                    -- 声明一个str 字符串
+                    DECLARE str VARCHAR(100) DEFAULT 'ABCDEFabcdef123456';
+                    -- 记录当前是第几个
+                    DECLARE i INT DEFAULT 0;
+                    -- 生成的结果
+                    DECLARE res_str VARCHAR(255) DEFAULT '';
+                    WHILE i < n DO 
+                        -- 随机生成一个指定个数的字符串
+                    -- 	1 + RAND()*20
+                        SET res_str = CONCAT(res_str,SUBSTR(str, FLOOR(1+RAND()*18), 1));
+                        SET i = i + 1;
+                    END WHILE;
+                    RETURN res_str;
+                    END $$
+                    DELIMITER ;
+                使用: SELECT rand_strs(5);  // a24Ad
+                数据库可以直接使用: INSERT INTO books (id, genreid, name) VALUES (6,2, (SELECT rand_strs(10))); 
+                举例说明2: 
+                    给表格插入10000条数据
+                    DELIMITER $$
+                    CREATE PROCEDURE insert_emp(in startNum INT, in max_num INT)
+                    BEGIN 
+                        -- 声明一个变量记录当前是第几条数据
+                    DECLARE i INT DEFAULT 0;
+                        -- 默认情况是自动提交sql语句
+                    SET autocommit = 0;
+                        REPEAT 
+                            -- 插入数据 
+                            INSERT INTO test01(id, name, age) VALUES(startNum+i, (SELECT rand_strs(6)), FLOOR(10+RAND()*30));
+                        -- 当imax_num退出循环
+                        UNTIL i = max_num
+                        END REPEAT;
+                    COMMIT; -- 整体提交所有sql语句
+                    END $$
+                    DELIMITER ;
+                使用: CALL insert_string(100,10);
+    1.15 索引
+        1.15.1 什么是索引
+            索引用于快速找出在某列中有一特定值的行
+            不使用索引,MYSQL必须从第一条记录开始读取整个表, 直到找出相关的行.
+            表越大,查询数据所花费的时间越多
+            如果表中查询的列有一个索引, MYSQL能够快速到达一个位置前搜索相关数据
+            而不必查看所有数据, 那么将会节省很大一部分时间
+        1.15.2 索引的优势与劣势
+            优势: 
+                类似大学图书馆建数目索引, 提高数据检索效率, 降低数据库的IO成本
+                通过索引对数据进行排序, 降低数据排序的成本, 降低了CPU的消耗
+            劣势: 
+                实际上索引也是一张表, 该表保存了主键与索引字段, 并指向实体表的记录, 所以索引列也是要占空间的.
+                虽然索引大大提高了查询速度, 同时确会降低更新表的速度, 如对表进行INSERT, UPDATE, DELETE
+        1.15.3 索引分类
+            单值索引: 即一个索引只包含单个列, 一个表可以有多个单列索引
+            唯一索引: 索引列的值必须是唯一, 但允许有空值
+            复合索引: 一个索引包含多个列, (INDEX Multildx(id, name, age))
+            全文索引: 只有在MylSAM引擎上才能使用, 只能在CHAR, VARCHAR, TEXT类型字段上使用全文索引
+            空间索引: 空间索引是对空间数据类型的字段建立的索引
+        1.15.4 索引的操作
+            创建索引
+            删除索引
+            查看索引
+            自动创建索引

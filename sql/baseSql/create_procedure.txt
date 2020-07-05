@@ -1,0 +1,160 @@
+1.  存储实例
+    统计表中 emp 的行数，最早和最晚注册时间
+    BEGIN 
+        BEGIN
+            DECLARE emp_sum INT DEFAULT	0; -- 多少行	
+            SELECT COUNT(*) INTO emp_sum FROM emp;
+            SELECT emp_sum;
+        END;
+        BEGIN
+            DECLARE max_time TIMESTAMP;
+            DECLARE min_time TIMESTAMP;
+            SELECT MAX(create_time), MIN(create_time) INTO max_time, min_time FROM emp;
+            SELECT max_time, min_time;
+        END;
+    END
+
+2.1 存储实例带参数,IN
+    a. 变量是有作用域的，作用域在 BEGIN 和 END 之间，END结束变量的作用范围
+    b. 需要多个块之间传递值，可以使用全局变量
+    c. 传参变量是全局的，可以在多个块之间起作用
+    需求: 传入 id，返回用户的 ename
+        CREATE DEFINER=`root`@`localhost` PROCEDURE `cx_ename`(IN my_id int)
+        BEGIN
+            DECLARE my_ename VARCHAR(255) DEFAULT '';
+            SELECT ename INTO my_ename FROM emp WHERE id = my_id;
+            SELECT my_ename;
+        END
+
+2.2 存储实例带参数,OUT
+        CREATE DEFINER=`root`@`localhost` PROCEDURE `cx_ename`(IN my_id int, out my_ename VARCHAR(255))
+        BEGIN
+            SELECT ename INTO my_ename FROM emp WHERE id = my_id;
+        END
+    调用: 
+        SET @uname = "";
+        CALL cx_ename(4, @uname);
+        SELECT @uname;
+    结果: 
+        a. 传出参数，在调用过程中，可以改变其值，并返回
+        b. OUT 是传出参数，不能用于传入参数
+        c. 调用存储过程时，OUT参数也需要指定，但必须是变量，不能上常量
+        d. 如果即需要传入，也需要传出，则可以使用 INOUT 类型参数
+
+2.3 存储实例带参数,INOUT
+        CREATE DEFINER=`root`@`localhost` PROCEDURE `cx_ename`(INOUT my_id int, INOUT my_ename VARCHAR(255))
+        BEGIN
+            SET my_ename = "";
+            SELECT id, ename INTO my_id, my_ename FROM emp WHERE id = my_id;
+        END
+    调用: 
+        SET @id = 4;
+        SET @uname = "";
+        CALL cx_ename(@id, @uname);
+        SELECT @id AS yd_id, @uname AS my_name;
+
+3.  存储过程条件语句
+    编写存储过程，如果用户 id 是偶数则就给出 ename, 否则就返回 id
+    实例:
+        CREATE DEFINER=`root`@`localhost` PROCEDURE `test_os`(IN my_id INT)
+        BEGIN 
+            DECLARE my_ename VARCHAR(255) DEFAULT "";
+            if(my_id % 2 = 0)
+            THEN
+                SELECT ename INTO my_ename FROM emp WHERE id = my_id;
+                SELECT my_ename;
+            ELSE 
+                SELECT my_id;
+            END if;
+        END
+    调用: 
+        CALL test_os(121); 
+
+4.  根据传入用户 id 的参数
+    如果用户状态 status 为1，则给用户 score 增加10分；
+    如果用户状态 status 为2，则给用户 score 增加20分；
+    其他情况 score 增加30分
+    实例:
+        CREATE DEFINER=`root`@`localhost` PROCEDURE `cx_score`(IN my_id INT)
+        BEGIN 
+            DECLARE my_status INT DEFAULT 0;
+            SELECT status INTO my_status FROM emp WHERE id = my_id;
+            IF(my_status = 1)
+            THEN
+                UPDATE emp SET score = score + 10 WHERE id = my_id;
+            ELSEIF(my_status = 2)
+            THEN
+                UPDATE emp SET score = score + 20 WHERE id = my_id;
+            ELSE
+                UPDATE emp SET score = score + 30 WHERE id = my_id;
+            END IF;
+        END
+    调用: 
+        CALL cx_score(2);
+
+5.  While 循环语句
+    使用循环语句，向表 emp 中连续插入10条语句
+    实例:
+        CREATE DEFINER=`root`@`localhost` PROCEDURE `test_insert`()
+        BEGIN
+            DECLARE i INT DEFAULT 0;
+            DECLARE num INT DEFAULT 0;
+            SELECT COUNT(*) INTO num FROM emp;
+            SET i = num;
+            WHILE(i < num + 10 ) DO
+                BEGIN
+                    SELECT i;
+                    SET i = i + 1;
+                    INSERT INTO emp(id, ename) VALUES (i, "wuhan");
+                END;
+            END WHILE;
+        END
+    调用: 
+        CALL test_insert();
+
+6.  repeat 循环插入10条数据
+    实例:
+        CREATE DEFINER=`root`@`localhost` PROCEDURE `test_repeat`(IN my_ename VARCHAR(255))
+        BEGIN
+            DECLARE i INT DEFAULT 0;
+            DECLARE all_number INT DEFAULT 0;
+            SELECT COUNT(*) INTO all_number FROM emp;
+            SET i = all_number;
+            REPEAT
+                BEGIN
+                    SELECT i;
+                    SET i = i + 1;
+                    INSERT INTO emp(id, ename) VALUES(i, my_ename);
+                END;
+                UNTIL i >= all_number + 10
+            END REPEAT;
+        END
+    调用:
+        SET @ename = "shanghai";
+        CALL test_repeat(@ename);
+
+7.  游标使用
+    编写存储过程，使用游标， 把 id 为 偶数的记录逐行更新 ename 名字
+    实例:
+        CREATE DEFINER=`root`@`localhost` PROCEDURE `test_cursor`()
+        BEGIN
+            DECLARE stopFlag INT DEFAULT 0; -- 游标什么时候停止
+            DECLARE my_ename VARCHAR(255) DEFAULT "";
+        -- 定义一个游标，保存一个子查询的结果
+            DECLARE uename_cur CURSOR FOR SELECT ename FROM emp WHERE id%2=0;
+        -- 定义一个句柄，跟踪上一个 uename_cur 游标，到达最后一个执行相应操作，设置 SET stopFlag = 1， 用于下面条件语句
+            DECLARE CONTINUE HANDLER FOR NOT found SET stopFlag = 1; 
+        -- 打开游标 
+            OPEN uename_cur;
+        -- 取一次，往 my_ename 赋值一次 
+            FETCH uename_cur INTO my_ename; 
+            WHILE(stopFlag = 0) DO
+                BEGIN
+                    UPDATE emp SET ename = CONCAT(my_ename,"_nice") WHERE ename = my_ename;
+                    FETCH uename_cur INTO my_ename; 
+                END;
+            END WHILE;
+            CLOSE uename_cur;
+        END
+    调用:
+        CALL test_cursor();

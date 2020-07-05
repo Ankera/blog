@@ -1,0 +1,103 @@
+declare的处理程序和处理条件
+
+一,  DECLARE 处理程序
+    DECLARE handle_type HANDLER FOR condition_value [...] sp_statement
+    说明:
+        声明将一个句柄类型(处理程序)和指定的错误条件值以及设置的变量关联起来
+    实例:
+        declare continue handler for not found set stopflag = 1;
+    
+    2. 处理程序 handle_type 类型
+        CONTINUE 在代码块中执行，在循环中继续下一次循环
+        EXIT 退出 BEGIN ... END 的代码块
+        UNDO (暂不支持)
+
+    3. 条件值 condition_value
+        SQLSTATE [value]
+        SQLWARNING 是对所有以 01 开头的 SQLSTATE 代码的速记
+        NOT FOUND 是对所有以 02 开头的 SQLSTATE 代码的速记
+        SQLEXCEPTION 是对所有没有被 SQLWARNING 或者  NOT FOUND 标记的代码的速记
+
+    
+    实例:
+    emp 表中 id 是主键, 表格中已经存在 id = 1的数据
+    1. 没有错误处理机制的
+        DELIMITER $$
+            CREATE PROCEDURE test_handle()
+            BEGIN
+                DECLARE stopflag INT DEFAULT 0;
+                set stopflag = 1;
+                SELECT stopflag;
+                INSERT INTO emp(id) VALUES(1);
+                
+                set stopflag = 2;
+                SELECT stopflag;
+                INSERT INTO emp(id) VALUES(1);
+            END $$
+        DELIMITER ;
+
+        执行 CALL test_handle()
+        只会查询 stopflag = 1, 然而 stopflag = 2 是查询不出来的, 
+        sql 报错 Duplicate entry '1' for key 'PRIMARY'
+
+    2. 有错误处理机制的
+        DELIMITER $$
+            CREATE PROCEDURE test_handle_continue()
+            BEGIN
+                DECLARE stopflag INT DEFAULT 0;
+                DECLARE CONTINUE HANDLER for SQLSTATE '23000' set stopflag = 1;
+                SELECT stopflag;
+                INSERT INTO emp(id) VALUES(1);
+                
+                set stopflag = 2;
+                SELECT stopflag;
+                INSERT INTO emp(id) VALUES(1);
+
+                set stopflag = 3;
+                SELECT stopflag;
+                INSERT INTO emp(id) VALUES(1);
+            END $$
+        DELIMITER ;
+        备注: 当检测到 SQLSTATE = 23000 时, 继续 CONTINUE 执行 BEGIN ... END 
+
+        执行 CALL test_handle_continue()
+        三条 SELECT 都可以查询出来
+
+
+二, DECLARE 处理条件
+1.  CASE 用法
+    根据传入的ID不同来更新 level 值
+    实例:
+        delimiter $$
+            CREATE PROCEDURE test_care(IN my_id INT)
+            BEGIN
+                DECLARE my_level INT DEFAULT 0;
+                SELECT level INTO my_level FROM emp WHERE id = my_id;
+                CASE my_level
+                    WHEN 1 THEN UPDATE emp SET level = 10 WHERE id = my_id;
+                    WHEN 2 THEN UPDATE emp SET level = 20 WHERE id = my_id;
+                    WHEN 3 THEN UPDATE emp SET level = 30 WHERE id = my_id;
+                    ELSE UPDATE emp SET level = 10 WHERE id = my_id;
+                END CASE;
+            END $$
+        delimiter ;
+    调用: 
+        CALL test_care(1);
+
+2.  流程控制查询应用
+    把 emp 表中 is_add 循环更新为1
+    实例:
+        delimiter $$
+            CREATE PROCEDURE test_while()
+            BEGIN	
+                DECLARE my_uid INT DEFAULT 0;
+                WHILE(SELECT COUNT(*) FROM emp WHERE is_add = 0)>0 DO
+                    BEGIN
+                        SELECT id INTO my_uid FROM emp WHERE is_add = 0 LIMIT 1;
+                        UPDATE emp SET is_add = 1 WHERE id = my_uid;
+                    END;
+                END WHILE;
+            END $$
+        delimiter ;
+    调用: 
+        CALL test_while()

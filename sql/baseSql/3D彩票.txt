@@ -1,0 +1,16 @@
+需求: 设计一个福彩的开奖过程存储，每3分钟开奖一次
+    第一步: 先编写一个存储过程 open_lottery, 产生随机3个数，生成一个开奖记录
+    第二步: 编写一个事件调度器，每3分钟调用一次这个存储过程
+
+第一步
+CREATE DEFINER=`root`@`localhost` PROCEDURE `open_lottery`()
+BEGIN 
+	INSERT INTO lottery(num1,num2,num3, ctime) SELECT FLOOR(RAND()*9)+1, FLOOR(RAND()*9)+1, FLOOR(RAND()*9)+1, NOW();
+END
+
+第二步 event scheduler 的创建
+    CREATE EVENT IF NOT EXISTS lottery_event    创建使用 CREATE EVENT
+    ON SCHEDULE EVERY 10 SECOND                 说明什么时候执行，多长时间执行一次
+    ON COMPLETION PRESERVE                      调度计划执行完成后是保留还是不保留
+    DO CALL	open_lettery;                       这个调度计划要做什么?
+

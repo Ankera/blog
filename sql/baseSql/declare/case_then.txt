@@ -1,0 +1,38 @@
+1.  case when then 语句
+    实例:
+    SELECT CASE status WHEN 1 then 10
+	    WHEN 2 THEN 20
+	    WHEN 3 THEN 30
+	    ELSE 100
+    END as my_status FROM users;
+
+2.  mysql操作查询结果case when then else end用法举例
+    地址: https://www.cnblogs.com/clphp/p/6256207.html	
+    创建表格:
+        CREATE TABLE `emp` (
+        `id` int(11) NOT NULL AUTO_INCREMENT,
+        `ename` varchar(255) DEFAULT NULL,
+        `job` varchar(255) DEFAULT NULL,
+        `salary` decimal(18,2) DEFAULT NULL,
+        `deptno` int(11) DEFAULT NULL,
+        `mgr` int(11) DEFAULT NULL,
+        PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+    2.1 case 用法举例1
+        你想按照 emp的 salary列对查询结果进行排序，但该字段可能为 Null。
+        因此，你需要想 个办撞来指定是否应该将 Null 值排到后面。
+        根据你希望的排序方式(以及你所使用的数据库管理系统如何处理 Null 值排序问题)，你
+        能够对可能为 Null 的列进行升序排列或者降序排列 。
+        这个解决方案表明，如果一个可能为 Null 的列含有非 Null 值，它们也会相应地被升序排 列或降序排列l:
+        这与你的直觉可能相反。但是，如果你希望采用与非 Null 值列不同的方式 来排列 Null 值，
+        例如，你可能想把非 Null 值以升序排列或降序排列，而把全部 Null 值都 放到最后面，
+        那么你就要使用 CASE表达式来动态调整排序项。
+        实例:
+            SELECT * FROM (
+	            SELECT ename, salary, mgr, (CASE WHEN salary IS NOT NULL THEN 1 ELSE 0 END) AS is_null FROM emp
+            )  AS temp_t1 ORDER BY is_null DESC ,salary DESC;
+    2.2 case 用法举例2 
+        把 emp 表中deptno=2单独抽离出来排序
+            SELECT * FROM (
+                SELECT ename, salary, mgr, ( CASE WHEN deptno = 2  THEN 1 ELSE 2 END ) AS is_deptno FROM emp
+            ) AS temp_02 ORDER BY is_deptno DESC, salary ASC;

@@ -1,0 +1,208 @@
+1.  字符串合并
+    SELECT CONCAT('aaa','bbb','ccc')    aaabbbccc
+    SELECT CONCAT('aaa','bbb',null)     null
+
+2.  字符串替换
+    把字符串从第几个位置开始，替换到第几个位置
+    SELECT INSERT('abcdef',2,1,'W');    aWcdef
+
+3.  大小写转换
+    SELECT LOWER("Fsdf fFFF")   fsdf ffff
+    SELECT UPPER("fdf");    FDF
+
+4.  LEFT(str,x) & RIGHT(str,x)
+    分别返回字符串最左边的x个字符 和 最右边的x个字符
+    如果第二个参数为null, 那么不返回任何字符
+    SELECT LEFT("FAFDSFXzsss", 4);  FAFD
+    SELECT RIGHT('fdfdasfwre', 5);  sfwre
+
+5.  LPAD(str, n, pad)   & RPAD(str, n, pad)
+    用字符串pad对字符串str最左边或最右边进行填充, 直接到长度为n个字符长度
+    SELECT LPAD('yu',5,1234);           123yu
+    SELECT LPAD('yu2222',5,123456);     yu222
+    SELECT RPAD('yu',5,1234);           yu123
+
+6.  LTRIM(str)  &   RTRIM(str)    &     TRIM(str)
+    分别去掉字符串最左边, 最右边, 左右两边的空字符
+
+7.  REPEAT(str, null)
+    把str重复n次
+    SELECT REPEAT('yu',4);
+
+8.  REPLACE(str, a, b)
+    用字符串b替换字符串中所有出现的a字符
+    SELECT REPLACE('abcdab','c','*')    ab*dab
+
+9.  SUBSTRING(str, a, b)
+    返回字符串str中第a位置起到第b个字符
+    SELECT SUBSTRING('QWERTYUI', 2, 5);     WERTY
+
+10. ABS(x)  返回绝对值
+
+11. CEIL(x) 向上取整
+
+12. FLOOR(x)    向下取整
+
+13. MOD(x,y)  返回x/y模  
+
+14. RAND()  返回0~1之间的随机数
+
+15. 日期相关函数 https://www.cnblogs.com/ggjucheng/p/3352280.html
+    a. DATE_ADD 增加3年
+    SELECT DATE_ADD(NOW(),INTERVAL	3	YEAR);
+    b. MySQL 日期、时间转换函数：
+        date_format(date,format), time_format(time,format) 能够把一个日期/时间转换成各种各样的字符串格式。
+        它是 str_to_date(str,format) 函数的 一个逆转换。
+
+16. 流程 & 系统相关函数
+    a. IF(bol, a, b)
+    SELECT IF(6>2,"hello world","are you ok")
+    b. IFNULL(a, b)
+    如果a不为空，就返回a， 否则返回b
+    c. DATABASE();
+        返回数据库名
+    d. VERSION()
+        返回当前数据库版本号
+    e. USER();
+        返回当前用户名
+    f.  PASSWORD('a');
+        加密
+
+17  事务
+    1. 事务实例
+    START TRANSACTION; -- 开启事务
+    UPDATE zs_count	 SET money = money - 2000;
+    UPDATE lisi_count SET money = money + 2000;
+    COMMIT; -- 关闭事务
+
+    2. 回滚
+    ROLLBACK; -- 撤销提交的事务
+    
+
+18  创建用户
+    CREATE USER 'anker'@'localhost' IDENTIFIED BY '123456';
+    删除用户
+    DROP USER 'anker'@'localhost'
+
+19.1创建视图, 查询相应的条件创建一个虚拟表
+    CREATE VIEW 视图名 AS (查询语句)
+    CREATE VIEW emp_salary AS (SELECT * FROM emp WHERE salary > 2000)
+
+19.2修改视图
+    CREATE OR REPLACE VIEW 视图名 AS (查询语句)
+
+    视图机制:1. 替换式(MERGE)， 将视图公式替换后，当成一个整体 sql 语句进行处理
+            2. 具化式(TEMPTABLE)， 先处理视图结果，后处理外面的查询需求
+    替换式
+    CREATE ALGORITHM = MERGE VIEW 视图名 AS (查询语句);
+    CREATE ALGORITHM = MERGE VIEW emp_s_t AS (SELECT ename, salary FROM emp)
+    
+    WITH CHECK OPTION 更新数据时不能插入或更新不符合视图限制条件的记录
+
+20  存储
+    1. 创建存储视图
+        delimiter $$
+        CREATE PROCEDURE anker_01()
+        BEGIN
+            SELECT * FROM emp;  // emp是表名
+        END	$$
+        delimiter ;
+
+    2. 查看存储列表
+    SHOW PROCEDURE STATUS;
+    3. 查看具体存储函数
+    SHOW PROCEDURE STATUS anker_01;
+    4. 删除存储
+    DROP PROCEDURE anker_01;
+
+    5. 存储过程变量声明
+        delimiter $$
+        CREATE PROCEDURE anker_0211()
+        BEGIN
+            DECLARE res VARCHAR(255) DEFAULT '';
+            DECLARE x,y INT DEFAULT 0;
+            -- 给变量赋值
+            SET x = 100;
+            SET y = 200;
+            
+            SELECT AVG(salary) FROM emp;
+        END	$$
+        delimiter ;
+    
+    6.1存储过程传递参数(三种参数)
+       IN       传入的参数
+       OUT      输出的参数
+       INOUT    输入&输出
+    实例:
+        delimiter $$
+        CREATE PROCEDURE ankerGetName_01(in name VARCHAR(255))
+        BEGIN
+            SELECT * FROM emp WHERE ename = name;
+        END $$
+        delimiter ;
+        调用: CALL ankerGetName_01("Tom");
+    6.2 输出参数
+        delimiter $$
+        CREATE PROCEDURE ankerGetSalry_01(in n VARCHAR(255), out t_salary int)
+        BEGIN
+            SELECT salary INTO  t_salary FROM emp WHERE ename = n;
+        END $$
+        delimiter ;
+    实例：
+        CALL ankerGetSalry_01("lisi", @s);
+        SELECT @s FROM DUAL; (FROM DUAL 可以省略, DUAL是一个虚拟表)
+    6.3 输入&输出参数
+    实例:
+        delimiter $$
+        CREATE PROCEDURE anker_test_01(inout num int, in inc int)
+        BEGIN
+            set num = num + inc;
+        END $$
+        delimiter ;
+
+        SET @num1 = 20;
+        CALL anker_test_01(@num1, 10);
+
+        SELECT @num1;
+    6.3 自定义函数
+    BUG 解决地址: https://blog.csdn.net/topasstem8/article/details/8216740/
+    实例:
+        delimiter $$
+        CREATE FUNCTION rand_str(n int) RETURNS VARCHAR(255)
+        BEGIN	
+            -- 声明一个变量
+            DECLARE str VARCHAR(255) DEFAULT "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM";
+            -- 记录当前第几个
+            DECLARE i INT DEFAULT 0;
+            -- 记录生成的结果
+            DECLARE res_str VARCHAR(255) DEFAULT "";
+            WHILE i < n DO
+                SET res_str = CONCAT(res_str, SUBSTR(str, FLOOR(1+RAND()*52), 1));
+                SET i = i + 1;
+            END WHILE;
+            RETURN res_str;
+        END $$
+        delimiter ;
+    调用: 
+        SELECT rand_str(10);
+    6.4 存储千万条数据, 调用 6.3 中的函数
+        delimiter $$
+        CREATE PROCEDURE insert_emp(in startNum INT, in max_num INT)
+        BEGIN 
+            -- 生命一个变量记录当前是第几条数据
+            DECLARE i INT DEFAULT 0;
+            -- 默认情况自动提交
+            SET autocommit = 0;
+            REPEAT
+                SET i = i + 1;
+                -- 插入数据
+                INSERT INTO temp01 VALUES(startNum+i, rand_str(10), FLOOR(RAND()*30+10));
+            -- 当达到什么条件退出
+            UNTIL i = max_num 
+            END REPEAT;
+            -- 整体提交所有数据
+            COMMIT;
+        END $$
+        delimiter ;
+    实例:
+        CALL insert_emp(0, 10000000);

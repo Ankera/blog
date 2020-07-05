@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>svg_伞形分布图</title>
+    <style>
+        #div {
+            width: 400px;
+            height: 400px;
+            border: 1px solid #cccccc;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="div">
+        <svg id="svg" xmlns="http://www.w3.org/2000/svg" version="1.1" height="100%" width="100%">
+
+        </svg>
+    </div>
+</body>
+<script>
+    let svgNS = "http://www.w3.org/2000/svg";
+    let oParent = document.getElementById("div");
+    let oSvg = document.getElementById("svg");
+    function createTag(tag, objAttr) {
+        let oTag = document.createElementNS(svgNS, tag);
+        for (const attr in objAttr) {
+            if (objAttr.hasOwnProperty(attr)) {
+                oTag.setAttribute(attr, objAttr[attr]);
+            }
+        }
+
+        return oTag;
+    }
+
+    let arrNum = [15, 30, 40, 15]; // 和是100
+    let sumNum = 0; // 起始累加角度值
+    let angle = 360; // 正圆角度
+    let outerR = 120; // 外圆半径
+    let innerR = 70; // 内圆半径
+    let centerX = 200; // 中心点坐标
+    let centerY = 200;
+    let outerXY = [{ x: 320, y: 200 }]; // 外圆起始位置
+    let innerXY = [{ x: 270, y: 200 }]; // 内圆起始位置
+    let π = Math.PI / 180; // 一度所对应的弧度
+    let colors = ["red", "blue", "orange", "green"];
+
+    for (let i = 0; i < arrNum.length; i++) {
+        let agNum = arrNum[i] / 100 * angle;
+        sumNum += agNum;
+        if (i === arrNum.length - 1) {
+            sumNum = angle;
+        }
+
+        let useAngle = sumNum * π;
+        let outerX = Math.cos(useAngle) * outerR + centerX;
+        let outerY = Math.sin(useAngle) * outerR + centerY;
+        let innerX = Math.cos(useAngle) * innerR + centerX;
+        let innerY = Math.sin(useAngle) * innerR + centerY;
+
+        // 外部的点
+        outerXY.push({
+            x: outerX,
+            y: outerY
+        });
+
+        innerXY.push({
+            x: innerX,
+            y: innerY
+        });
+    }
+
+    // 创建图形
+    for (let i = 0; i < outerXY.length; i++) {
+        if (i === outerXY.length - 1) {
+            break;
+        }
+        let oPath = createTag("path", {
+            fill: colors[i],
+            d: `M${outerXY[i].x} ${outerXY[i].y} A${outerR} ${outerR} 0 0 1 ${outerXY[i + 1].x} ${outerXY[i + 1].y} L${innerXY[i + 1].x} ${innerXY[i + 1].y} A${innerR} ${innerR} 0 0 0 ${innerXY[i].x} ${innerXY[i].y}`
+        });
+
+        oSvg.appendChild(oPath);
+    }
+</script>
+
+</html>

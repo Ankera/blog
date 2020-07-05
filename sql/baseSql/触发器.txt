@@ -1,0 +1,27 @@
+触发器: https://www.cnblogs.com/CraryPrimitiveMan/p/4206942.html
+
+1.  处于审计的需求，当有人往表 users 插入一条记录时，把插入的 id， uname，插入动作， 插入时间 记录来
+    创建触发器:
+        CREATE TRIGGER tr_emp_insert AFTER INSERT ON users
+        FOR EACH ROW
+        BEGIN
+            INSERT INTO oplog(uid, uname, action, optime) VALUES(NEW.uid, NEW.uname, "INSERT", now());
+        END
+    当在 users 插入一条数据时，oplog新增一条历史记录
+    
+
+2.  处于审计的目的，当删除 users 表时，记录删除前该记录的主要字段
+    创建触发器:
+        CREATE TRIGGER tr_emp_delete BEFORE DELETE on users
+        FOR EACH ROW
+        BEGIN
+            INSERT INTO oplog(uid, uname, action, optime, old_value) VALUES(OLD.uid, OLD.uname, 'DELETE', now(), OLD.gold);
+        END
+    当在 emp 中删除一条数据时，oplog新增一条历史记录
+
+    总结: NEW 代表插入，删除，更新之后的值
+         OLD 代表插入，删除，更新之前的值
+
+
+什么是触发器?
+    

@@ -1,0 +1,45 @@
+生产场景描述:
+    1. 在游戏中，每个账号(accountid)可以最多创建5个角色，角色表 game_character
+    2. 5个角色放到一定的槽位(slot)中，槽位值必须是0-4，不能有相同的槽位，否则在游戏中就无法
+        正常看到角色。
+    3. 两个游戏分区需要合服，合服之后每个账号按照规则删除只剩下5个角色，但槽位可能有重复的
+
+    实现需求:
+        同一个账号有多个角色有重复槽位值，需要重置槽位值，使其在0-4且不重复
+    
+    实现难点:
+        有多个账号(accountid)， 多个账号下又有多个角色
+        多个账号使用一个循环，每个账号多个角色又使用循环，即使用嵌套循环
+
+    实例:
+        CREATE DEFINER=`root`@`localhost` PROCEDURE `zonghe`()
+        BEGIN
+            DECLARE AID INT DEFAULT 0; 
+            DECLARE stopflag INT DEFAULT 0;
+            DECLARE curAcc CURSOR FOR SELECT accountid FROM reset_slot_accountid;
+            DECLARE CONTINUE HANDLER FOR NOT FOUND SET stopflag = 1;
+            OPEN curAcc;
+            FETCH curAcc INTO AID;
+            REPEAT
+                BEGIN
+                    DECLARE CID INT DEFAULT 0;
+                    DECLARE Cslot INT DEFAULT 0;
+                    DECLARE done INT DEFAULT 0;
+                    DECLARE curChar CURSOR FOR SELECT characterid FROM game_character WHERE accountid = AID;
+                    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+                    SET Cslot = 0;
+                    OPEN curChar;
+                    FETCH curChar INTO CID;
+                    WHILE(done = 0) DO
+                        BEGIN
+                            UPDATE game_character SET charslot = Cslot WHERE characterid = CID;
+                            SET Cslot = Cslot + 1;
+                            FETCH curChar INTO CID;
+                        END;
+                    END WHILE;
+                    CLOSE curChar;
+                END;
+            UNTIL stopflag = 1 END REPEAT;
+            CLOSE curAcc;
+        END
+    

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>requestIdleCallback</title>
+</head>
+
+<body>
+    测试requestIdleCallback
+</body>
+<script>
+    function sleep(delay) {
+        for (let start = Date.now(); Date.now() - start <= delay;) { }
+    }
+
+    let start = Date.now();
+    let works = [
+        () => {
+            console.log("第一个start");
+            sleep(20);
+            console.log("第一个end");
+        },
+        () => {
+            console.log("第二个start");
+            sleep(20);
+            console.log("第二个end");
+        },
+        () => {
+            console.log("第三个start");
+            sleep(20);
+            console.log("第三个end");
+        }
+    ];
+
+    work();
+
+    function work() {
+        window.requestIdleCallback(workLoop, {
+            timeout: 100
+        });
+    }
+
+    function workLoop(dealine) {
+        console.log(dealine.timeRemaining(), dealine.didTimeout) // true 没有过期
+        while((dealine.timeRemaining() > 0 || dealine.didTimeout) && works.length > 0){
+            performUnitOfWork();
+        }
+
+        if (works.length > 0) {
+            work();
+        } else {
+            console.log(Date.now() - start);
+        }
+    }
+
+    function performUnitOfWork() {
+        works.shift()();
+    }
+</script>
+
+</html>

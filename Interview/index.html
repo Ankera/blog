@@ -1,0 +1,149 @@
+<script>
+    // 该方法会返回一个当前页面执行的时间的时间戳
+    // var a1 = 0;
+    // console.log('performance.now()', performance.now())
+    // console.log('performance.now()', performance.now())
+    // for (let i = 0; i < 100000000; i++) {
+    //     a1++;
+    // }
+    // console.log('performance.now()', performance.now())
+
+
+</script>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #root {
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            position: absolute;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+<script>
+    let root = document.getElementById('root');
+    let index = 0;
+    // setInterval(() => {
+    //     if (index >= 0 && index < 800) {
+    //         index += 500;
+    //     } else if (index >= 800) {
+    //         index -= 500;
+    //     }
+    //     root.style.left = index + "px";
+
+
+    // }, 10);
+    // var render = function(){
+    //     if (index >= 0 && index < 800) {
+    //         index += 500;
+    //     } else if (index >= 800) {
+    //         index -= 500;
+    //     }
+    //     root.style.left = index + "px";
+    //     requestAnimationFrame(render)
+    // }
+
+    requestAnimationFrame(function (rafTime) {
+        // console.log(rafTime)
+    })
+
+    var start = null;
+    var element = document.getElementById('root');
+    let i = 0;
+
+    function step(timestamp) {
+        i++;
+        console.log(`第${i}次timestamp--`, timestamp);
+        if (!start) start = timestamp;
+        var progress = timestamp - start;
+        console.log(`第${i}次progress--`, progress);
+        element.style.left = Math.min(progress / 10, 200) + 'px';
+        if (progress < 2000) {
+            window.requestAnimationFrame(step);
+        }
+    }
+
+    // window.requestAnimationFrame(step);
+
+
+    // var previousFrameTime = 33;
+    // var frameDeadline = 0;
+    // var activeFrameTime = 33;
+    // var isMessageEventScheduled = false;
+    // var _index = 0;
+    // var animationTick = function (rafTime) {
+    //     // console.log('rafTime', rafTime);
+    //     if (_index <= 10) {
+    //         requestAnimationFrame(animationTick);
+    //     }
+    //     _index++;
+    //     var nextFrameTime = rafTime - frameDeadline + activeFrameTime;
+    //     // console.log('nextFrameTime', nextFrameTime);
+
+    //     if (
+    //         nextFrameTime < activeFrameTime &&
+    //         previousFrameTime < activeFrameTime
+    //     ) {
+    //         activeFrameTime = nextFrameTime < previousFrameTime ? previousFrameTime : nextFrameTime;
+    //         console.log('activeFrameTime', activeFrameTime);
+    //     } else {
+    //         previousFrameTime = nextFrameTime;
+    //     }
+
+    //     frameDeadline = rafTime + activeFrameTime;
+    //     // console.log('frameDeadline', frameDeadline)
+
+    //     if (!isMessageEventScheduled) {
+    //         isMessageEventScheduled = true;
+    //         // 把任务推送到队列中
+    //         window.postMessage(undefined);
+    //     }
+
+    // }
+
+    // requestAnimationFrame(animationTick);
+
+    // console.log('activeFrameTime', activeFrameTime);
+
+    // window.addEventListener('message', function () {
+    //     isMessageEventScheduled = false;
+
+    //     var currentTime = performance.now();
+    //     var a1 = 0;
+    //     for (let i = 0; i < 30000000; i++) {
+    //         a1++;
+    //     }
+    //     if (frameDeadline - currentTime <= 0) {
+    //         console.log('没有剩余时间')
+    //     } else {
+    //         console.log('有时间', frameDeadline - currentTime)
+    //     }
+
+    // })
+
+    for (let i = 0; i < 2; i++) {
+        console.log(i)
+
+    }
+
+    /*
+    32+3 = 9
+    i = 0   i<2     log  i++    (i = 1)
+    i = 1   i<2     log  i++    i=2
+    i = 2   2<2 
+    1       n+1     n     n 
+    
+    */
+</script>
+
+</html>

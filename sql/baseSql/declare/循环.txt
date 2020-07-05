@@ -1,0 +1,35 @@
+1.  需求: WHILE
+    使用循环语句，向表 users 中插入10条连接的记录
+    实例:
+        CREATE DEFINER=`root`@`localhost` PROCEDURE `test_insert`()
+        BEGIN
+            DECLARE i INT DEFAULT 0;
+            WHILE(i <= 10) DO
+                BEGIN	
+                    SELECT i;
+                    SET i = i + 1;
+                    INSERT INTO users(uname) VALUES("ANKER");
+                END;
+            END WHILE;
+        END
+    调用:
+        CALL test_insert();
+
+
+2.  使用 repeat 循环语句
+    实例:
+        CREATE DEFINER=`root`@`localhost` PROCEDURE `test_insert`()
+        BEGIN
+            DECLARE i INT DEFAULT 0;
+            REPEAT
+                BEGIN	
+                    SELECT i;
+                    SET i = i + 1;
+                    INSERT INTO users(uname) VALUES("TOM");
+                END;
+            UNTIL i >= 10
+            END REPEAT;
+        END
+    调用:
+        CALL test_insert();
+    

@@ -1,0 +1,70 @@
+1.  实例:
+        CREATE DEFINER=`root`@`localhost` PROCEDURE `testa`()
+        BEGIN
+            DECLARE my_uname VARCHAR(32) DEFAULT "";
+            SET my_uname  = 'anker';
+            SELECT uname INTO my_uname FROM users WHERE uid  = 2;
+            SELECT my_uname;
+        END;
+
+2.  找出 users, hxf 两个表格中行数，同时找出 users 中最早注册时间和最晚注册时间
+    实例:
+        CREATE DEFINER=`root`@`localhost` PROCEDURE `testb`()
+        BEGIN
+            BEGIN
+                DECLARE hxf_sum INT DEFAULT 0;
+                DECLARE users_sum INT DEFAULT 0;
+                SELECT COUNT(*) INTO hxf_sum FROM hxf;
+                SELECT COUNT(*) INTO users_sum FROM users;
+                SELECT hxf_sum, users_sum;
+            END;
+            BEGIN 
+                DECLARE max_regtime TIMESTAMP;
+                DECLARE min_regtime TIMESTAMP;
+                SELECT MAX(regtime), MIN(regtime) INTO max_regtime, min_regtime FROM users;
+                SELECT max_regtime, min_regtime;
+            END;
+        END
+    备注: 注意变量声明的位置, BEGIN...END 里面声明的变量， 子可以访问，兄弟节点不可以访问
+
+3.  存储过程的参数
+    编写存储过程，传入 uid， 返回对应的 uname
+    实例:
+        CREATE DEFINER=`root`@`localhost` PROCEDURE `testc`(IN my_uid INT)
+        BEGIN 
+            DECLARE my_uname VARCHAR(32) DEFAULT "";
+            SELECT uname INTO my_uname FROM users WHERE uid = my_uid;
+            SELECT my_uname;
+        END
+
+4.  存储过程的传出参数 OUT
+    调用存储过程时，传入 uid 返回该用户的 uid
+    实例:
+        CREATE DEFINER=`root`@`localhost` PROCEDURE `testc`(IN my_uid INT, OUT my_uname VARCHAR(32))
+        BEGIN 
+            SELECT uname INTO my_uname FROM users WHERE uid = my_uid;
+            SELECT my_uname;
+        END
+    调用:
+        SET @uname = "";
+        CALL testc(2, @uname);
+
+    总结:
+    a.  传出参数， 在调用存储过程中，可以改变其值，并可返回
+    b.  OUT 是传出参数，不能用于传入参数值
+    c.  调用存储过程时， OUT 参数也需要指定，但必须是变量，不能是常量
+    d.  如果既需要传入，同时又需要传出，则可以使用 INOUT 类型参数
+
+5.  需求: 
+    调用存储过程时，参数 my_uid 和 my_uname 既是传入，也是传出参数
+    实例:
+        CREATE DEFINER=`root`@`localhost` PROCEDURE `testd`(INOUT my_uid INT, INOUT my_uname VARCHAR(32))
+        BEGIN
+            SET my_uname = "";
+            SELECT uid, uname INTO my_uid, my_uname FROM users WHERE uid = my_uid;
+        END
+    调用:
+        SET @uname = "";
+        SET @uid = 2;
+        CALL testd(@uid, @uname);
+        SELECT @uid	as uid ,@uname as uname;  

@@ -1,0 +1,25 @@
+{
+  "name": "gzh",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./app.js",
+    "server": "./bin/ngrok.sh",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ejs": "^3.0.1",
+    "glob": "^7.1.6",
+    "koa": "^2.11.0",
+    "mongoose": "^5.9.2",
+    "raw-body": "^2.4.1",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.5",
+    "sha1": "^1.1.1",
+    "xml2js": "^0.4.23"
+  }
+}

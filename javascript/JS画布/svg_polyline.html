@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG-画布</title>
+    <style>
+        #div {
+            width: 400px;
+            height: 400px;
+            border: 1px solid #cccccc;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="div">
+        <svg id="svg" xmlns="http://www.w3.org/2000/svg" version="1.1" height="100%" width="100%">
+            <!-- <polyline points="0 0 50 50 50 100 100 200 300 300 300 50 0 0" fill="none" stroke="black" stroke-width="2"></polyline> -->
+        </svg>
+        <button id="clear">clear</button>
+    </div>
+</body>
+<script>
+    let svgNS = "http://www.w3.org/2000/svg";
+    let oParent = document.getElementById("div");
+    let clear = document.getElementById("clear")
+
+    function createTag(tag, objAttr) {
+        let oTag = document.createElementNS(svgNS, tag);
+        for (const attr in objAttr) {
+            if (objAttr.hasOwnProperty(attr)) {
+                oTag.setAttribute(attr, objAttr[attr])
+            }
+        }
+        return oTag;
+    }
+
+    let oSvg = document.getElementById("svg");
+    let oPolyline = null;
+    oSvg.onmousedown = function () {
+        oPolyline = createTag("polyline", {
+            fill: "none",
+            stroke: "black",
+            "stroke-width": 1
+        });
+        oSvg.appendChild(oPolyline);
+
+        oSvg.onmousemove = function (ev) {
+            let x = ev.clientX - oParent.offsetLeft;
+            let y = ev.clientY - oParent.offsetTop;
+
+            let points = oPolyline.getAttribute("points");
+            if (points) {
+                points = `${points} ${x} ${y}`
+            } else {
+                points = `${x} ${y}`
+            }
+            oPolyline.setAttribute("points", points);
+        }
+    }
+
+    oSvg.onmouseup = function () {
+        oSvg.onmousemove = null;
+    }
+
+    // 清除
+    clear.onclick = function () {
+        let firstElementChild = null;
+        while (firstElementChild = oSvg.firstElementChild) {
+            firstElementChild.remove()
+        }
+    }
+</script>
+
+</html>

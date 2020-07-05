@@ -1,0 +1,39 @@
+1.  需求:
+    编写存储过程，如果用户 uid 是偶数则就给出 uname, 其他情况只返回 uid
+    实例:
+        CREATE DEFINER=`root`@`localhost` PROCEDURE `testIf_01`(IN my_uid INT)
+        BEGIN
+            DECLARE my_uname VARCHAR(32) DEFAULT "";
+            if(my_uid % 2 = 0)
+            THEN
+                SELECT uname INTO my_uname FROM users WHERE uid = my_uid;
+                SELECT my_uname;
+            ELSE
+                SELECT my_uid;
+            END if;
+        END
+    调用:
+        CALL testIf_01(1)
+
+2.  需求:
+    a. 如果用户状态 status 为1， 则给用户 score 加10分
+    b. 如果用户状态 status 为2， 则给用户 score 加20分
+    c. 其他情况加30分
+    实例:
+        CREATE DEFINER=`root`@`localhost` PROCEDURE `testIf_02`(IN my_uid INT)
+        BEGIN 
+            DECLARE my_status INT DEFAULT 0;
+            SELECT status INTO my_status FROM users WHERE uid = my_uid;
+            if(my_status = 1)
+            THEN
+                UPDATE users SET score = score + 10 WHERE uid = my_uid;
+            ELSEIF (my_status = 2)
+            THEN 
+                UPDATE users SET score = score + 20 WHERE uid = my_uid;
+            ELSE
+                UPDATE users SET score = score + 30 WHERE uid = my_uid;
+            END IF;
+        END
+    调用:
+        CALL testIf_02(5)
+

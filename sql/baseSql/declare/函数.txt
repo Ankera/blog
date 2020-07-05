@@ -1,0 +1,45 @@
+1.  函数必须有返回值， RETURN
+    实例:
+        CREATE DEFINER=`root`@`localhost` FUNCTION `hs_01`(my_uid INT) RETURNS varchar(32) CHARSET utf8mb4
+            READS SQL DATA
+        BEGIN
+            DECLARE my_uname VARCHAR(32) DEFAULT "";
+            SELECT uname INTO my_uname FROM users WHERE uid = my_uid;
+            RETURN my_uname;
+        END
+    调用:
+        SELECT hs_01(2);
+
+    备注: SQL 数据访问四种级别
+        CONTAINS SQL    
+        NO SQL
+        READS SQL DATA
+        MODIFIES SQL DATA
+
+2.  需求:
+    输入用户 accountid, uid, uname 组合的 UUID 值，在全区游戏中作为用户的唯一标识
+    实例:
+        CREATE DEFINER=`root`@`localhost` FUNCTION `hs_02`(my_uid int) RETURNS varchar(32) CHARSET utf8mb4
+            READS SQL DATA
+        BEGIN
+            DECLARE uuid VARCHAR(32) DEFAULT "";
+            SELECT CONCAT(accountid	, "_", uid, "_", uname) INTO uuid FROM users WHERE uid = my_uid;
+            RETURN uuid;
+        END
+    调用:
+        SELECT hs_02(2);
+
+3.  需求:
+    输入参数 uid, 计算该 uid 所在账号下的所有游戏角色的金币总量
+    实例:
+        CREATE DEFINER=`root`@`localhost` FUNCTION `hs_03`(my_uid int) RETURNS varchar(32) CHARSET utf8mb4
+            READS SQL DATA
+        BEGIN
+            DECLARE my_accountid INT DEFAULT 0;
+            DECLARE gold_sum INT DEFAULT 0;
+            SELECT accountid INTO my_accountid FROM users WHERE uid = my_uid;
+            SELECT sum(gold) INTO gold_sum FROM users WHERE accountid = my_accountid;
+            RETURN gold_sum;
+        END
+    调用: 
+        SELECT hs_03(2);

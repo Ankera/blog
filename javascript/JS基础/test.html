@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+</body>
+<!-- <script src="./arrayBuffer_类型化数组.js"></script> -->
+<!-- <script src="./call.js"></script> -->
+<!-- <script src="./base_类型转换.js"></script> -->
+<!-- <script src="./base_拷贝.js"></script> -->
+<!-- <script src="./aop.js"></script> -->
+<!-- <script src="./promise.js"></script> -->
+<script>
+    const PENDING = "PENDING";
+    const RESOVLED = "RESOVLED";
+    const REJECTED = "REJECTED";
+
+    function Promise(executor) {
+        this.value = undefined;
+        this.reason = undefined;
+        this.status = PENDING;
+        this.resolveCallbacks = []; // 成功时的回调函数
+        this.rejectCallbacks = []; // 失败是的回调函数
+
+        const self = this;
+        function resolve(value) {
+            if (self.status === PENDING) {
+                this.value = value;
+                this.status = RESOVLED;
+
+                self.resolveCallbacks.forEach(fn => fn());
+            }
+        }
+
+        function reject(reason) {
+            if (self.status === PENDING) {
+                this.reason = reason;
+                this.status = REJECTED;
+
+                self.rejectCallbacks.forEach(fn => fn());
+            }
+        }
+
+        executor(resolve, reject);
+    }
+
+    Promise.prototype.then = function (onfulfilled, onrejected) {
+
+        const self = this;
+        let resultPromise = new Promise((resolve, reject) => {
+            if (self.status === RESOVLED) {
+                try {
+                    const val = onfulfilled(this.value);
+                    nextPromise(resultPromise, val, resolve, reject);
+                } catch (error) {
+                    reject(error);
+                }
+            }
+
+            if (self.status === REJECTED) {
+                const val = onrejected(this.reason);
+            }
+
+            if (self.status === PENDING) {
+                self.resolveCallbacks.push(() => {
+                    onfulfilled(self.value);
+                });
+
+                self.rejectCallbacks.push(() => {
+                    onrejected(self.reason);
+                });
+            }
+        });
+
+        return resultPromise;
+    }
+
+    function nextPromise(promise, val, resolve, reject) {
+        if (promise === val) {
+            return reject(new TypeError("Chaining cycle detected for promise"))
+        }
+
+        if (val !== null && (typeof val === "object" || typeof val === "function")) {
+            let called;
+            try {
+                let then = val.then;
+                if (typeof then === "function") {
+                    then.call(val, success => {
+                        if (called) return;
+                        called = true;
+
+                        nextPromise(nextPromise, success, resolve, reject);
+                    }, error => {
+                        if (called) return;
+                        called = true;
+                        reject(error);
+                    })
+                } else {
+                    resolve()
+                }
+            } catch (error) {
+                if (called) return;
+                called = true;
+                reject(error);
+            }
+        } else {
+            resolve(val);
+        }
+    }
+</script>
+<script>
+    let p1 = new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve("success");
+        }, 2000)
+    });
+
+
+    p1.then(data => {
+        console.log(data)
+    }, err => {
+
+    });
+</script>
+
+<!-- <script>
+    let p1 = new Promise((resolve, reject) => {
+        // throw new Error("error is now")
+        // setTimeout(() => {
+        //     resolve("success");
+        // }, 1000)
+
+        resolve("success");
+        // reject("error");
+    });
+
+    let p2 = p1.then((data) => {
+        console.log("p1 success", data);
+        return new Promise((resolve, reject) => {
+            resolve(new Promise((r1, r2) => {
+                setTimeout(() => {
+                    r1(10086);
+                }, 1000)
+            }))
+        })
+    }, (err) => {
+        console.log("p1 err", err);
+        return 10086;
+    });
+
+    p2.then(data => {
+        console.log("p2 success", data);
+    }, err => {
+        console.log("p2 err", err)
+    }) 
+</script> -->
+
+</html>
