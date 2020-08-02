@@ -1,4 +1,4 @@
 # blog
 Summary of Front-end Learning
 
-## 绪论待定。。。
+个人学习总结

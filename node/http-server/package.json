@@ -1,0 +1,24 @@
+{
+  "name": "http-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "bin": {
+    "my-http-server": "./bin/start.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "commander": "^5.1.0",
+    "crypto": "^1.0.1",
+    "ejs": "^3.1.3",
+    "mime": "^2.4.6",
+    "mz": "^2.7.0",
+    "nodemon": "^2.0.4"
+  }
+}

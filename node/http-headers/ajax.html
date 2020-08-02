@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    ajax
+    <div></div>
+</body>
+<script>
+    let xhr = new XMLHttpRequest();
+    xhr.open("DELETE", "http://127.0.0.1:3003/user", true);
+    document.cookie = "name=Tom";
+    xhr.withCredentials = true; // 跨域时强制携带 cookie
+    xhr.setRequestHeader("Authoriztion", "anker"); // 自定义携带头
+
+    xhr.responseType = "json";
+
+    xhr.onload = function () {
+        console.log(xhr.response)
+    }
+
+    xhr.send();
+</script>
+
+</html>

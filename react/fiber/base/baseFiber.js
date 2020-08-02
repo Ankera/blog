@@ -40,7 +40,7 @@ function workLoop(deadline) {
 }
 
 function nextUnitOfWork(fiber) {
-    begin(fiber);
+    begin(fiber); // 处理 fiber
     if (fiber.child) {
         return fiber.child;
     }

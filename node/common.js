@@ -2,6 +2,12 @@ let path = require("path");
 let fs = require("fs");
 let vm = require("vm");
 
+/**
+ * 模块化的作用
+ *  1. 解决命名冲突
+ *  2. 方便维护
+ */
+
 function myRequire(id) {
     let absPath = Module._resolveFileName(id);
     if (Module._cacheModule[absPath]) {
@@ -14,12 +20,11 @@ function myRequire(id) {
         Module._cacheModule[module.id] = module.exports;
         return module.exports;
     }
-
 }
 
 function Module(id) {
     this.id = id;
-    this.exports = {};
+    this.exports = {};  // 代表的是模块的返回结果
     this.loaded = false; //模块是否已加载完毕
 }
 

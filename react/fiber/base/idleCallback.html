@@ -43,7 +43,7 @@
     }
 
     function workLoop(dealine) {
-        console.log(dealine.timeRemaining(), dealine.didTimeout) // true 没有过期
+        console.log(dealine.timeRemaining(), dealine.didTimeout) // true 过期
         while((dealine.timeRemaining() > 0 || dealine.didTimeout) && works.length > 0){
             performUnitOfWork();
         }
