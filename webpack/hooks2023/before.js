@@ -19,3 +19,5 @@ hook.tap({ name: 'tapD', before: ['tapB', 'tapC'] }, () => {
 })
 
 hook.call('zhufeng')
+
+console.log('test')
