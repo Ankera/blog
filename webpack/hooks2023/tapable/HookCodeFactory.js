@@ -1,6 +1,5 @@
 class HookCodeFactory {
   setup(hook, options) {
-    console.log('hook', hook)
     hook._x = options.taps.map((tap) => tap.fn)
   }
 
@@ -27,6 +26,19 @@ class HookCodeFactory {
   header() {
     let code = ''
     code += 'var _x = this._x;\n'
+    const interceptors = this.options.interceptors
+
+    if (interceptors.length > 0) {
+      code += `var _taps = this.taps;\n`
+      code += `var _interceptors = this.interceptors\n`
+      for (let i = 0; i < interceptors.length; i++) {
+        const interceptor = interceptors[i]
+        if (interceptor.call) {
+          code += `_interceptors[${i}].call(${this.args()});\n`
+        }
+      }
+    }
+    // console.log(code)
     return code
   }
 
@@ -51,8 +63,17 @@ class HookCodeFactory {
       case 'async':
         fn = new Function(
           this.args({ after: '_callback' }),
-          this.header() + this.content()
+          this.header() + this.content({ onDone: () => `_callback();\n` })
         )
+      case 'promise':
+        const taps = this.options.taps
+        const tapsContent = this.content({ onDone: () => `_resolve();\n` })
+        let content = `
+          return new Promise(function(_resolve) {
+            ${tapsContent}
+          });
+        `
+        fn = new Function(this.args(), this.header() + content)
       default:
         break
     }
@@ -73,28 +94,44 @@ class HookCodeFactory {
     return code
   }
 
-  callTapsParalle() {
+  callTapsParalle({ onDone }) {
     const taps = this.options.taps
+    const type = this.options.type
     if (taps.length === 0) {
       return ''
     }
 
     let code = `
       var _counter = ${taps.length};
-      var _done = (function(){ _callback(); })
+      var _done = (function(){ ${onDone()} })
     `
 
     for (let i = 0; i < taps.length; i++) {
       const content = this.callTap(i)
       code += content
     }
+
     return code
   }
 
   callTap(tapIndex) {
     let code = ''
+
+    const interceptors = this.options.interceptors
+
+    if (interceptors.length > 0) {
+      code += `_tap${tapIndex} = _taps[${tapIndex}];\n`
+      for (let i = 0; i < interceptors.length; i++) {
+        const interceptor = interceptors[i]
+        if (interceptor.tap) {
+          code += `_interceptors[${i}].tap(${this.args()});\n`
+        }
+      }
+    }
+
     code += `var _fn${tapIndex} = _x[${tapIndex}];\n`
     const tapInfo = this.options.taps[tapIndex]
+
     switch (tapInfo.type) {
       case 'sync':
         code += `_fn${tapIndex}(${this.args()});\n`
@@ -106,11 +143,53 @@ class HookCodeFactory {
         })
         `
         return code
+      case 'promise':
+        code += `
+        var _promise${tapIndex} = _fn${tapIndex}(${this.args()})
+        _promise${tapIndex}.then(function(){
+          if(--_counter === 0){ _done() };
+        })
+        `
+        return code
       default:
         return ''
     }
+
     return code
   }
 }
 
 module.exports = HookCodeFactory
+
+// var _x = this._x
+
+// return new Promise(function (_resolve) {
+//   var _counter = 3
+//   var _done = function () {
+//     _resolve()
+//   }
+//   var _fn0 = _x[0]
+
+//   var _promise0 = _fn0(names)
+//   _promise0.then(function () {
+//     if (--_counter === 0) {
+//       _done()
+//     }
+//   })
+//   var _fn1 = _x[1]
+
+//   var _promise1 = _fn1(names)
+//   _promise1.then(function () {
+//     if (--_counter === 0) {
+//       _done()
+//     }
+//   })
+//   var _fn2 = _x[2]
+
+//   var _promise2 = _fn2(names)
+//   _promise2.then(function () {
+//     if (--_counter === 0) {
+//       _done()
+//     }
+//   })
+// })

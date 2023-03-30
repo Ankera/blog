@@ -11,6 +11,14 @@ class Hook {
     this.call = CALL_DELEGATE
 
     this.callAsync = CALL_ASYNC_DELEGATE
+
+    this.promise = PROMISE_DELEGATE
+
+    this.interceptors = []
+  }
+
+  intercept(interceptor) {
+    this.interceptors.push(interceptor)
   }
 
   tap(options, fn) {
@@ -21,6 +29,10 @@ class Hook {
     this._tap('async', options, fn)
   }
 
+  tapPromise(options, fn) {
+    this._tap('promise', options, fn)
+  }
+
   _tap(type, options, fn) {
     if (typeof options === 'string') {
       options = { name: options }
@@ -28,6 +40,7 @@ class Hook {
 
     let tapInfo = { ...options, type, fn }
 
+    this._runRegisterInterceptors(tapInfo)
     this._insert(tapInfo)
   }
 
@@ -39,9 +52,22 @@ class Hook {
     throw new Error('抽象方法，之类实现')
   }
 
+  _runRegisterInterceptors(tapInfo) {
+    for (const interceptor of this.interceptors) {
+      if (interceptor.register) {
+        interceptor.register(tapInfo)
+      }
+    }
+  }
+
   _createCall(type) {
     // this._x = this.taps.map((tap) => tap.fn)
-    return this.compile({ type, taps: this.taps, args: this.args })
+    return this.compile({
+      type,
+      taps: this.taps,
+      args: this.args,
+      interceptors: this.interceptors,
+    })
   }
 }
 
@@ -53,6 +79,11 @@ function CALL_DELEGATE(...args) {
 function CALL_ASYNC_DELEGATE(...args) {
   this.callAsync = this._createCall('async')
   return this.callAsync(...args)
+}
+
+function PROMISE_DELEGATE(...args) {
+  this.promise = this._createCall('promise')
+  return this.promise(...args)
 }
 
 module.exports = Hook
