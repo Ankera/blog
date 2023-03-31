@@ -1,4 +1,5 @@
-const AsyncQueue = require('webpack/lib/util/AsyncQueue')
+// const AsyncQueue = require('webpack/lib/util/AsyncQueue')
+const AsyncQueue = require('./async-queue.js')
 
 /**
  *
