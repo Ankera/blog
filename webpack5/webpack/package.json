@@ -1,0 +1,18 @@
+{
+  "name": "webpack",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev1": "webpack --config=webpack.config.s1.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "html-webpack-plugin": "^5.5.0",
+    "lodash": "^4.17.21",
+    "webpack": "^5.77.0",
+    "webpack-cli": "^5.0.1"
+  }
+}
