@@ -1,6 +1,7 @@
 // import '@babel/polyfill'
 // import 'bootstrap'
 // import moment from 'moment'
+import('./one.js')
 import _ from 'lodash'
 import './index.css'
 

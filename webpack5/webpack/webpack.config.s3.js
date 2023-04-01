@@ -26,6 +26,12 @@ module.exports = {
     // 优化⑩②】支持构建清除
     clean: true,
   },
+  // 【优化⑩④】- ② 缓存打包
+  // webpack 5 默认是缓存到内存中
+  cache: {
+    type: 'filesystem',
+    cacheDirectory: path.resolve(__dirname, 'node_modules/.cache/webpack'),
+  },
   devtool: false,
   mode: 'development',
   // 【优化①】打包使用的目标
@@ -59,6 +65,9 @@ module.exports = {
      */
     minimize: true,
     minimizer: [new TerserWebpackPlugin()],
+
+    moduleIds: 'deterministic',
+    chunkIds: 'deterministic',
   },
   module: {
     // 配置那些模块的内容不需要进行解析
@@ -68,9 +77,25 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-        },
+        use: [
+          // 【优化⑩③】 多进程打包
+          /**
+           * 开启子进程去打包
+           */
+          {
+            loader: 'thread-loader',
+            options: {
+              workers: 3,
+            },
+          },
+          {
+            loader: 'babel-loader',
+            options: {
+              // 【优化⑩④】- ① 缓存打包
+              cacheDirectory: true,
+            },
+          },
+        ],
       },
       {
         test: /\.css$/,
