@@ -1,0 +1,7 @@
+#root {
+  font-size: 26px;
+}
+
+.active {
+  background-color: red;
+}

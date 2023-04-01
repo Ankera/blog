@@ -1,5 +1,5 @@
-// const AsyncQueue = require('webpack/lib/util/AsyncQueue')
-const AsyncQueue = require('./async-queue.js')
+const AsyncQueue = require('webpack/lib/util/AsyncQueue')
+// const AsyncQueue = require('./async-queue.js')
 
 /**
  *
@@ -8,10 +8,15 @@ const AsyncQueue = require('./async-queue.js')
  * @param {*} callback 表示处理器完成的callback
  */
 function processor(item, callback) {
-  setTimeout(() => {
+  if (item.key === 'item1') {
     item.number = Math.random()
     callback(null, item)
-  }, 2000)
+  } else {
+    setTimeout(() => {
+      item.number = Math.random()
+      callback(null, item)
+    }, 2000)
+  }
 }
 
 const queue = new AsyncQueue({
