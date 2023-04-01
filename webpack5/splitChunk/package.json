@@ -1,12 +1,13 @@
 {
-  "name": "webpack",
+  "name": "splitchunk",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "dev1": "webpack --config=webpack.config.s1.js",
     "dev2": "webpack --config=webpack.config.s2.js",
-    "dev3": "webpack --config=webpack.config.s3.js"
+    "dev3": "webpack --config=webpack.config.s3.js",
+    "dev4": "webpack --config=webpack.config.s4.js"
   },
   "keywords": [],
   "author": "",
