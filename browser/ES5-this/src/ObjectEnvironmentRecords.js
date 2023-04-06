@@ -3,7 +3,7 @@ const EnvironmentRecords = require('./EnvironmentRecords')
 /**
  * 每一个对象式记录项都有一个关联对象，这个对象称为 《绑定对象》
  */
-class ObjectEnvironmentRecords extends RecursiveEnvironment {
+class ObjectEnvironmentRecords extends EnvironmentRecords {
   constructor(bindingObject) {
     super()
     this.bindingObject = bindingObject
@@ -14,16 +14,13 @@ class ObjectEnvironmentRecords extends RecursiveEnvironment {
     let envRec = this
     let bindings = envRec.bindingObject
 
-    return Object.hasOwnProperty(bindings, N)
+    return bindings.hasOwnProperty(N)
   }
 
   CreateMutableBinding(N, D) {
     let envRec = this
     let bindings = envRec.bindingObject
-    console.assert(
-      !Object.hasOwnProperty(bindings, N),
-      `当前记录中已经有${N}绑定`
-    )
+    console.assert(!bindings.hasOwnProperty(N), `当前记录中已经有${N}绑定`)
     Object.defineProperty(bindings, N, {
       value: undefined,
       enumerable: true,

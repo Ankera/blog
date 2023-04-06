@@ -1,6 +1,6 @@
 const EnvironmentRecords = require('./EnvironmentRecords')
 
-class DeclarativeEnvironmentRecords extends RecursiveEnvironment {
+class DeclarativeEnvironmentRecords extends EnvironmentRecords {
   HasBinding(N) {
     let envRec = this
     return N in envRec
