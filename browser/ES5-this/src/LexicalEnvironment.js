@@ -1,5 +1,6 @@
 const DeclarativeEnvironmentRecords = require('./DeclarativeEnvironmentRecords')
 const ObjectEnvironmentRecords = require('./ObjectEnvironmentRecords')
+const Reference = require('./Reference')
 
 /**
  * 课时19
@@ -60,6 +61,25 @@ class LexicalEnvironment {
     env.outer = E
 
     return env
+  }
+
+  static GetIdentifierReference(lex, name, strict) {
+    debugger
+    if (!lex) {
+      return new Reference(undefined, name, strict)
+    } else {
+      let envRec = lex.environmentRecords
+      let exists = envRec.HasBinding(name)
+      if (exists) {
+        return new Reference(envRec, name, strict)
+      } else {
+        return LexicalEnvironment.GetIdentifierReference(
+          envRec.outer,
+          name,
+          strict
+        )
+      }
+    }
   }
 }
 

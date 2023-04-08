@@ -28,16 +28,16 @@ class DeclarativeEnvironmentRecords extends EnvironmentRecords {
     propertyDescriptor.initialization = true
   }
 
-  GetMutableBinding(N, S) {
+  GetBindingValue(N, S) {
     let envRec = this
     console.assert(this.HasBinding(N), '当前环境中尚未定义N变量')
     const propertyDescriptor = Object.getOwnPropertyDescriptor(envRec, N)
-    if (!propertyDescriptor.initialiation) {
-      if (S) {
-        throw new Error('RefereceError')
-      }
-      return undefined
-    }
+    // if (!propertyDescriptor.initialiation) {
+    //   if (S) {
+    //     throw new Error('RefereceError')
+    //   }
+    //   return undefined
+    // }
     return envRec[N]
   }
 

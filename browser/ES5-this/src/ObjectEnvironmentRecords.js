@@ -40,7 +40,7 @@ class ObjectEnvironmentRecords extends EnvironmentRecords {
     bindings[N] = V
   }
 
-  GetMutableBinding(N, S) {
+  GetBindingName(N, S) {
     let envRec = this
     let bindings = envRec.bindingObject
     let value = this.HasBinding(N)
