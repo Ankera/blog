@@ -7,7 +7,7 @@ class EnvironmentRecords {
     this.bindings[N] = undefined
   }
 
-  setBinding(N, V) {
+  setBindings(N, V) {
     this.bindings[N] = V
   }
 
