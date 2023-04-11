@@ -3,6 +3,8 @@ const path = require('path')
 function updateCompiler(compiler) {
   const options = compiler.options
 
+  // console.log('===', options)
+
   //1 来自 webpack-dev-server client 浏览器客户端 websocket
   options.entry.main.import.unshift(require.resolve('../../client/index.js'))
 

@@ -22,7 +22,7 @@ class Server {
     const webSocketServer = io(this.server)
     // 监听客户端连接
     webSocketServer.on('connection', (socket) => {
-      console.log('一个新的')
+      console.log('一个新的websocket客户端已经连接上来了')
       this.sockets.push(socket)
 
       socket.on('disconnect', () => {
@@ -32,17 +32,18 @@ class Server {
 
       if (this._stats) {
         socket.emit('hash', this._stats.hash)
-        socket.emit('ok!!!!')
+        // =================================================================
+        socket.emit('ok')
       }
     })
   }
 
   setupHooks() {
     this.compiler.hooks.done.tap('webpack-dev-server', (stats) => {
-      console.log('新的编译完成', stats.hash)
+      console.log('新的编译完成=====', stats.hash, this.sockets.length)
       this.sockets.forEach((socket) => {
         socket.emit('hash', stats.hash)
-        socket.emit('ok666')
+        socket.emit('ok')
       })
       this._stats = stats
     })
@@ -55,7 +56,7 @@ class Server {
 
   routes() {
     if (this.devServerArgs.static.directory) {
-      // this.app.use(express.static(this.devServerArgs.static.directory))
+      this.app.use(express.static(this.devServerArgs.static.directory))
     }
   }
 

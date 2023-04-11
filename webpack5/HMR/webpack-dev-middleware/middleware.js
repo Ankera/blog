@@ -10,6 +10,7 @@ function wrapper({ fs, outputPath }) {
     if (url === '/') {
       url = '/index.html'
     }
+    console.log('outputPath', outputPath, url)
     const filename = path.join(outputPath, url)
 
     try {

@@ -3,10 +3,7 @@ let render = () => {
 
   const root = document.getElementById('root')
 
-  root.innerHTML = `
-    <input type="text" id="text" />
-    <h1>${title} 1</h1>
-  `
+  root.innerHTML = title
 }
 
 render()

@@ -12,10 +12,7 @@ let render = () => {
 
   const root = document.getElementById('root')
 
-  root.innerHTML = `
-    <input type="text" id="text" />
-    <h1>${title} 1</h1>
-  `
+  root.innerHTML = title
 }
 
 render()
@@ -33,7 +30,10 @@ if (true) {
   \**********************/
 /***/ ((module) => {
 
-module.exports = 'hello Title !!11!'
+module.exports = 'hello world 2335'
+
+// http://localhost:7070/mian.d43868f03cdf02ef197d.hot-update.json
+// http://localhost:7070/main.63e69315f7eff03e114f.hot-update.js
 
 
 /***/ }),
@@ -42,9 +42,29 @@ module.exports = 'hello Title !!11!'
 /*!********************************************!*\
   !*** ./webpack-dev-server/client/index.js ***!
   \********************************************/
-/***/ (() => {
+/***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
 
-console.log('client =============')
+const hotEmitter = __webpack_require__(/*! ../../webpack/hot/emitter.js */ "./webpack/hot/emitter.js")
+// const io = require('socket.io')
+
+const socket = io()
+
+var currentHash
+
+socket.on('hash', (hash) => {
+  console.log('发送给客户端hash', hash)
+  currentHash = hash
+})
+
+socket.on('ok', () => {
+  console.log('发送给客户端ok')
+
+  reloadApp()
+})
+
+function reloadApp() {
+  hotEmitter.emit('webpackHotUpdate', currentHash)
+}
 
 
 /***/ }),
@@ -53,9 +73,36 @@ console.log('client =============')
 /*!***********************************!*\
   !*** ./webpack/hot/dev-server.js ***!
   \***********************************/
-/***/ (() => {
+/***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
 
-console.log('dev-server')
+const hotEmitter = __webpack_require__(/*! ../../webpack/hot/emitter.js */ "./webpack/hot/emitter.js")
+
+hotEmitter.on('webpackHotUpdate', (currentHash) => {
+  console.log('dev-server 收到了最新的hash值', currentHash)
+})
+
+
+/***/ }),
+
+/***/ "./webpack/hot/emitter.js":
+/*!********************************!*\
+  !*** ./webpack/hot/emitter.js ***!
+  \********************************/
+/***/ ((module) => {
+
+class EventEmitter {
+  constructor() {
+    this.events = {}
+  }
+  on(eventName, fn) {
+    this.events[eventName] = fn
+  }
+  emit(eventName, ...args) {
+    this.events[eventName](...args)
+  }
+}
+
+module.exports = new EventEmitter()
 
 
 /***/ })
@@ -121,7 +168,7 @@ console.log('dev-server')
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("e287c3b3f35c85558c33")
+/******/ 		__webpack_require__.h = () => ("f9e99002b106e16638d1")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */
@@ -643,7 +690,7 @@ console.log('dev-server')
 /******/ 			});
 /******/ 		}
 /******/ 		
-/******/ 		self["webpackHotUpdatehmr"] = (chunkId, moreModules, runtime) => {
+/******/ 		self["webpackHotUpdate"] = (chunkId, moreModules, runtime) => {
 /******/ 			for(var moduleId in moreModules) {
 /******/ 				if(__webpack_require__.o(moreModules, moduleId)) {
 /******/ 					currentUpdate[moduleId] = moreModules[moduleId];
@@ -1120,9 +1167,9 @@ console.log('dev-server')
 /******/ 	// module cache are used so entry inlining is disabled
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
-/******/ 	__webpack_require__("./src/index.js");
+/******/ 	__webpack_require__("./webpack-dev-server/client/index.js");
 /******/ 	__webpack_require__("./webpack/hot/dev-server.js");
-/******/ 	var __webpack_exports__ = __webpack_require__("./webpack-dev-server/client/index.js");
+/******/ 	var __webpack_exports__ = __webpack_require__("./src/index.js");
 /******/ 	
 /******/ })()
 ;
