@@ -4,10 +4,25 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-<script defer src="main.js"></script></head>
+  <title>Document</title></head>
 <body>
   <input type="text">
   <div id="root"></div>
+  <button id="btn">按钮</button>
+  <script>
+    
+    function Foo(property_num,element_num) {
+        //添加可索引属性
+        for (let i = 0; i < element_num; i++) {
+            this[i] = `element${i}`
+        }
+        //添加常规属性
+        for (let i = 0; i < property_num; i++) {
+            let ppt = `property${i}`
+            this[ppt] = ppt
+        }
+    }
+    var bar = new Foo(12,10)
+  </script>
 </body>
 </html>
