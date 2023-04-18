@@ -1,0 +1,92 @@
+{
+  "name": "@zm-template/imitate-antd",
+  "version": "1.0.1",
+  "description": "React组件库",
+  "main": "index.js",
+  "files": [
+    "dist",
+    "es",
+    "lib"
+  ],
+  "scripts": {
+    "build": "webpack",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook",
+    "test:unit": "jest --config unit.jest.js",
+    "test:e2e": "jest --config e2e.jest.js",
+    "test": "npm run test:unit && npm install test:e2e",
+    "compile": "gulp compile"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "keywords": [
+    "React",
+    "Component"
+  ],
+  "author": ",",
+  "license": "MIT",
+  "dependencies": {
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
+  },
+  "peerDependencies": {
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.15.5",
+    "@babel/plugin-transform-runtime": "^7.15.0",
+    "@babel/plugin-transform-typescript": "^7.15.4",
+    "@babel/preset-env": "^7.15.6",
+    "@babel/preset-react": "^7.14.5",
+    "@commitlint/cli": "^13.1.0",
+    "@commitlint/config-conventional": "^13.1.0",
+    "@storybook/addon-essentials": "^6.3.8",
+    "@storybook/react": "^6.3.8",
+    "@types/enzyme": "^3.10.9",
+    "@types/jest": "^27.0.1",
+    "@types/jest-environment-puppeteer": "^4.4.1",
+    "@types/jest-image-snapshot": "^4.3.1",
+    "@types/puppeteer": "*5.4.4",
+    "@types/react": "^17.0.21",
+    "@types/react-dom": "^17.0.9",
+    "@typescript-eslint/parser": "^4.31.1",
+    "@wojtekmaj/enzyme-adapter-react-17": "^0.6.3",
+    "and": "^0.0.3",
+    "autoprefixer": "^10.3.4",
+    "babel-loader": "^8.2.2",
+    "commitizen": "^4.2.4",
+    "css-loader": "^6.2.0",
+    "cz-customizable": "^6.3.0",
+    "enzyme": "^3.11.0",
+    "eslint": "^7.32.0",
+    "eslint-config-airbnb": "^18.2.1",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.24.2",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-react": "^7.25.2",
+    "eslint-plugin-react-hooks": "^4.2.0",
+    "gulp": "^4.0.2",
+    "gulp-babel": "^8.0.0",
+    "gulp-typescript": "^6.0.0-alpha.1",
+    "husky": "^7.0.2",
+    "jest": "^27.2.0",
+    "jest-environment-puppeteer": "^5.0.4",
+    "jest-image-snapshot": "^4.5.1",
+    "jest-puppeteer": "^5.0.4",
+    "less": "^4.1.1",
+    "less-loader": "^10.0.1",
+    "merge2": "^1.4.1",
+    "mini-css-extract-plugin": "^2.3.0",
+    "postcss-loader": "^6.1.1",
+    "prettier": "^2.4.1",
+    "puppeteer": "^10.2.0",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.4.3",
+    "webpack": "^5.53.0",
+    "webpack-cli": "^4.8.0"
+  }
+}
