@@ -1,8 +1,11 @@
 {
   "name": "@zm-template/imitate-antd",
-  "version": "1.0.1",
+  "version": "1.0.4",
   "description": "React组件库",
-  "main": "index.js",
+  "main": "lib/index.js",
+  "module": "es/index.js",
+  "unpkg": "dist/antd.js",
+  "typings": "lib/index.d.ts",
   "files": [
     "dist",
     "es",
@@ -15,7 +18,8 @@
     "test:unit": "jest --config unit.jest.js",
     "test:e2e": "jest --config e2e.jest.js",
     "test": "npm run test:unit && npm install test:e2e",
-    "compile": "gulp compile"
+    "compile": "gulp compile",
+    "patch": "npm version patch"
   },
   "publishConfig": {
     "access": "public",
