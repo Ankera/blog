@@ -7,7 +7,7 @@ const FixedSizeList = createListComponent({
   getItemOffset: ({ itemSize }, index) => itemSize * index,
   getStartIndexForOffset: ({ itemSize }, offset) =>
     Math.floor(offset / itemSize),
-  getStopIndexForOffset: ({ itemSize, height }, startIndex) => {
+  getStopIndexForStartIndexOffset: ({ itemSize, height }, startIndex) => {
     const numVisibleItems = Math.ceil(height / itemSize)
 
     // 结束位置是闭区间， -1
