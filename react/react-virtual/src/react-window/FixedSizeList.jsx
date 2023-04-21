@@ -13,6 +13,7 @@ const FixedSizeList = createListComponent({
     // 结束位置是闭区间， -1
     return numVisibleItems + startIndex - 1
   },
+  getOffsetForIndex: ({ itemSize }, index) => itemSize * index,
 })
 
 export default FixedSizeList

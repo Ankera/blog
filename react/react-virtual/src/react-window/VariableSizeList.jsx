@@ -156,7 +156,7 @@ function getItemMetadata(props, index, instanceProps) {
       offset = itemMetadata.offset + itemMetadata.size
     }
     for (let i = lastMeasuredIndex + 1; i <= index; i++) {
-      const size = itemSize(i)
+      const size = itemSize ? itemSize(i) : DEFAULT_ESTIMATED_ITEM_SIZE
       itemMetadataMap[i] = { offset, size }
       offset += size
     }
