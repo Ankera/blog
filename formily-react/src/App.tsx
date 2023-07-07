@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { Observer } from './@formily/reactive-react'
 import { observable, autorun } from './@formily/reactive'
-import Demo01 from './test/demo01'
-import Demo02 from './test/demo02'
-import Demo03 from './test/demo03'
-import Demo04 from './test/demo04'
+// import Demo01 from './test/demo01'
+// import Demo02 from './test/demo02'
+// import Demo03 from './test/demo03'
+// import Demo04 from './test/demo04'
+import Demo05 from './test/demo05'
 
 const username = observable({ value: 'zhufeng' })
 const age = observable({ value: 14 })
@@ -14,10 +15,7 @@ function App() {
 
   return (
     <div className="App">
-      <Demo01 />
-      <Demo02 />
-      <Demo03 />
-      <Demo04 />
+      <Demo05 />
       <Observer>
         {() => (
           <input

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Rich Text</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+      .toolbar {
+        width: 600px;
+        margin: 0 auto 10px;
+        line-height: 30px;
+      }
+      .editor {
+        width: 600px;
+        margin: 0 auto;
+        height: 500px;
+        border: 1px solid red;
+      }
+    </style>
+  </head>
+  <body>
+    <div>hello world</div>
+    <div class="toolbar">
+      <p id="toolbar">
+        <button data-cmd="redo">重做</button>
+        <button data-cmd="undo">回退</button>
+        <span>&nbsp;&nbsp;</span>
+        <button data-cmd="copy">复制</button>
+        <button data-cmd="cut">剪切</button>
+        <button data-cmd="forwardDelete">删除选中</button>
+        <button data-cmd="delete">删除</button>
+        <br />
+        <button data-cmd="insertHTML" data-pop="输入要插入的html">
+          插入html
+        </button>
+        <button data-cmd="insertImage" data-pop="输入图片地址">插入图片</button>
+        <button data-cmd="insertOrderedList">插入ol</button>
+        <button data-cmd="insertUnorderedList">插入ul</button>
+        <button data-cmd="insertParagraph">插入p</button>
+        <button data-cmd="insertText" data-pop="输入文本">插入文本</button>
+        <button data-cmd="createLink" data-pop="输入连接">创建链接</button>
+        <button data-cmd="unlink">删除链接</button>
+        <button data-cmd="insertHorizontalRule">插入分割线</button>
+        <br />
+        <button data-cmd="bold">变粗</button>
+        <button data-cmd="italic">斜体</button>
+        <button data-cmd="underline">下划线</button>
+        <button data-cmd="strikeThrough">删除线</button>
+        <button data-cmd="indent">缩进</button>
+        <button data-cmd="outdent">反缩进</button>
+        <button data-cmd="justifyCenter">居中</button>
+        <button data-cmd="justifyFull">平铺</button>
+        <button data-cmd="justifyLeft">居左</button>
+        <button data-cmd="justifyRight">居右</button>
+        <button data-cmd="fontName" data-pop="输入字体名称">字体</button>
+        <button data-cmd="fontSize" data-pop="输入字体大小1-7">字体大小</button>
+        <button data-cmd="foreColor" data-pop="输入字体颜色">字体颜色</button>
+        <button data-cmd="subscript">下标</button>
+        <button data-cmd="superscript">上标</button>
+        <button data-cmd="backColor" data-pop="输入背景颜色">背景颜色</button>
+        <br />
+        <button data-cmd="removeFormat">清除格式</button>
+        <button data-cmd="selectAll">全选</button>
+      </p>
+    </div>
+    <div class="editor">
+      <iframe id="editor" width="100%" height="100%" frameborder="0"></iframe>
+    </div>
+  </body>
+  <script>
+    class Selection {
+      constructor(window) {
+        this.window = window
+        this.document = window.document
+        this.ranges = this.getRanges()
+      }
+
+      getRanges() {
+        let selection
+        let ranges = []
+
+        if (this.document.selection) {
+          selection = this.document.selection
+          ranges = [selection.createRange()]
+        } else {
+          selection = this.window.getSelection()
+
+          for (let i = 0; i < selection.rangeCount; i++) {
+            ranges.push(selection.getRangeAt(i))
+          }
+        }
+
+        return ranges
+      }
+
+      setRanges(ranges) {
+        let selection
+
+        if (this.document.selection) {
+          selection = this.document.selection
+          ranges = ranges || this.ranges
+
+          let target = ranges[0]
+          let range = selection.createRange()
+
+          range.setEndPoint('EndToEnd', target)
+
+          if (range.text) {
+            range.setEndPoint('StartToStart', target)
+          }
+
+          range.select()
+        } else {
+          selection = this.window.getSelection()
+
+          selection.removeAllRanges()
+          ranges = ranges || this.ranges
+
+          ranges.forEach((range) => {
+            selection.addRange(range)
+          })
+        }
+      }
+
+      getRangeText(range) {
+        range = range || this.ranges[0]
+
+        if (!range) {
+          return ''
+        }
+
+        return range.text || range.toString()
+      }
+
+      getRangeNode(range) {
+        range = range || this.ranges[0]
+
+        if (!range) {
+          return null
+        }
+
+        let node = range.parentElement
+          ? range.parentElement()
+          : range.commonAncestorContainer
+
+        if (node.nodeType === 1) {
+          return node
+        } else {
+          return node.parentNode
+        }
+      }
+
+      isRangeEmpty(range) {
+        range = range || this.ranges[0]
+
+        if (!range) {
+          return false
+        }
+
+        if (range.text) {
+          return false
+        }
+
+        if (range.startContainer) {
+          if (
+            range.startContainer === range.endContainer &&
+            range.startOffset === range.endOffset
+          ) {
+            return true
+          }
+        }
+
+        return false
+      }
+      // 保存当前的选区
+      save() {
+        this.ranges = this.getRanges()
+      }
+      // 恢复之前保存的选区
+      restore() {
+        this.setRanges(this.ranges)
+      }
+    }
+
+    class Editor {
+      constructor(selector) {
+        this.editor = document.querySelector(selector)
+
+        this.window = this.editor.contentWindow
+        this.document = this.editor.contentDocument
+        this.document.designMode = 'on'
+
+        this.insertStyle()
+      }
+
+      insertStyle() {
+        let head = this.document.querySelector('head')
+        let style = this.document.createElement('style')
+
+        // 对内容的一些基本样式设置
+        style.innerHTML = `
+                * {
+                    margin: 0;
+                    padding: 0;
+                }
+                ul, ol {
+                    margin-left: 20px;
+                }
+            `
+
+        head.appendChild(style)
+      }
+
+      execCommand(cmd, args) {
+        // 执行命令，其中第二个参数是是否启用浏览器默认UI
+        // 由于是我们自己实现的UI，因此这里是false，表示进入默认UI
+        this.document.execCommand(cmd, false, args)
+      }
+
+      getSelection() {
+        return new Selection(this.window)
+      }
+    }
+
+    let toolbar = document.querySelector('#toolbar')
+    let editor = new Editor('#editor')
+
+    toolbar.addEventListener(
+      'click',
+      (event) => {
+        let target = event.target
+        let cmd = target.dataset.cmd
+        let args = null
+
+        if (!cmd) {
+          return
+        }
+        // 创建一个选区
+        let selection = editor.getSelection()
+        console.log('selection', selection)
+        // 并保存当前的状态
+        selection.save()
+
+        // 如果UI中有pop，就弹出提示，要求用户输入参数
+        if (target.dataset.pop !== void 0) {
+          let tips = target.dataset.pop || ''
+
+          args = prompt(tips, '')
+        }
+
+        // 恢复之前的选区，由于弹出prompt后，焦点会改变
+        selection.restore()
+
+        // 执行命令
+        editor.execCommand(cmd, args)
+      },
+      false
+    )
+  </script>
+</html>

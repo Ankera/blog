@@ -14,6 +14,9 @@ III、yum install docker-ce docker-ce-cli containerd.io -y;
 
 ```
 systemctl start docker;
+
+// 修改阿里云镜像
+systemctl daemon-reload
 ```
 
 
@@ -31,6 +34,14 @@ docker version;
 ```
 // 启动
 docker run -d -P nginx;
+
+// 映射8080端口
+docker run -d --name port_nginx -p 8080:80 nginx;
+// 映射随机端口
+docker run -d --name port_nginx2 --publish 80 nginx;
+// 查看端口映射关系
+docker container port port_nginx
+
 
 // 查看启动 --- 703c059ff20e
 docker ps
@@ -94,6 +105,9 @@ docker kill xxxx
 
 // 关掉所有容器
 docker rm $(docker ps -a -q)
+
+// 删除镜像
+docker rmi hello-world
 ```
 
 
@@ -102,5 +116,114 @@ docker rm $(docker ps -a -q)
 
 ```
 docker ps -a;
+```
+
+
+
+启动多个nginx
+
+```
+docker run -d -P nginx 
+```
+
+CONTAINER ID  IMAGE   COMMAND          CREATED     STATUS     PORTS          NAMES
+
+01485bb532f4  nginx   "/docker-entrypoint.…"  15 seconds ago  Up 3 seconds  0.0.0.0:32769->80/tcp  unruffled_mendeleev
+
+2238c1acf82e  nginx   "/docker-entrypoint.…"  11 minutes ago  Up 11 minutes  0.0.0.0:32768->80/tcp  boring_chatelet
+
+```
+启动进入nginx
+
+curl http://localhost:32769
+
+curl http://localhost:32768/hello.html
+```
+
+
+
+进入某一个nginx里
+
+```
+docker container exec -it 2238c1acf82e /bin/bash
+```
+
+
+
+启动一个容器centos，启动ping命令
+
+```
+docker run centos ping www.baidu.com
+```
+
+
+
+删除所有启动的容器
+
+```
+docker container rm $(docker ps -a -q)
+
+docker stop $(docker ps -a -q)
+```
+
+
+
+提交docker容器
+
+```
+docker container commit -m"我的nginx-zhufeng" -a"zimu" 02b0ce412906 zimu/zhufeng-nginx
+```
+
+
+
+push 到官网
+
+```
+
+```
+
+
+
+
+
+自己创建Dockerfile文件
+
+```
+FROM node
+MAINTAINER zimu
+COPY ./nodeproject /nodeproject
+WORKDIR /nodeproject
+USER root
+RUN npm install
+EXPOSE 3000
+ENV MYSQL_ROOT_PASSWORD 123456
+RUN npm run start
+```
+
+构建
+
+```
+ // 找到当前目录 Dockerfile 文件
+ docker build -t nodeproject:1.0.2 .
+```
+
+启动
+
+```
+控制台运行
+docker container run -p 3333:3000 -it nodeproject:1.0.1 /bin/bash
+
+后台运行 -d
+docker container run -d  -p 3333:3000  nodeproject:1.0.3
+```
+
+
+
+### 八、数据卷
+
+访问
+
+```
+docker run -d --name=nginx1 --mount src=nginx-volume,dst=/usr/share/nginx/html nginx;
 ```
 

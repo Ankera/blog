@@ -49,19 +49,23 @@ services:
     volumes:
       - "data:/data"
       - "./nginx2:/usr/share/nginx/html"
-  networks:
-    myweb:
-      driver: bridge
-  volumes:
-    data:
-      driver: local
+networks:
+  myweb:
+    driver: bridge
+volumes:
+  data:
+    driver: local
 ```
 
 
 
-#### 三、进入 nginx 中
+#### 三、进入 nginx 中 [链接](http://zhufengpeixun.com/strong/html/61.11.devops-docker.html#t6618.2%20%E7%BC%96%E5%86%99docker-compose.yml)
 
 ```
 docker-compose exec nginx1 bash
+```
+
+```
+http://zhufengpeixun.com/strong/html/61.11.devops-docker.html#t6618.2%20%E7%BC%96%E5%86%99docker-compose.yml
 ```
 
