@@ -1,0 +1,11 @@
+{
+  "presets": [
+    [
+      "@babel/env",
+      {
+        // 模块的关键字不要让 babel 处理，让 rollup 处理
+        "modules": false
+      }
+    ]
+  ]
+}

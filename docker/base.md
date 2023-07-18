@@ -25,6 +25,11 @@ systemctl daemon-reload
 
 ```
 docker version;
+
+
+docker images -a -q
+-a 列出本地所有镜像
+-q 只显示镜像ID
 ```
 
 
@@ -225,5 +230,128 @@ docker container run -d  -p 3333:3000  nodeproject:1.0.3
 
 ```
 docker run -d --name=nginx1 --mount src=nginx-volume,dst=/usr/share/nginx/html nginx;
+```
+
+
+
+常用命令
+
+```
+attach Attach to a running container #当前shell下 attach连接指定运行镜像 
+
+build Build an image from a Dockerfile #通过 Docke rfile 定制镜像 
+
+commit t Create a new image from a container changes#提交当前容器为新的镜像
+
+cp Copy files/folders from the containers filesystem to the host path #从容器中拷贝指定文件或者目录到宿主机中 
+
+create Create a new container #创建一个新的客 容器，同run，但不启动容器 
+
+diff Inspect changes on a container's filesystem #查看do cker容器变化 
+
+events Get real time events from the server #从docke 服务获取容器实时事件 
+
+exec Run a command in an existing container #在已存 在的容器上运行命令 
+
+export Stream the contents of a container as a tar archive #导出容器的内容流作为一个tar归档文件[对应import]
+
+history Show the history of an image #展示一个镜像 像形成历史 
+
+images List images #列出系统当前镜像 
+
+import Create a new filesystem image from the contents ofa tarball#从tar包中的内容创建一个新的文件系统映像[对应export]
+
+info Display system-wideinformation #显示系统相关信息 
+
+inspect Return low-level information on acontainer#查看容器详细信息
+
+kill Kill a running container #kill 指定docker容器 
+
+load Load an image from a tar archive #从一个tar包中加载一个镜像[对应save 
+
+login Register or Login to the dockerregistryserver#注册或者登陆一个docker源服务器
+
+logout Log out from a Docker registry server #从当前 Docker registry退出 
+
+logs Fetch the logs of a container #输出当前容器日志信息 
+
+Lookup the public-facing port which is NAT-ed to PRIVATE PORT#查看映射端口对应的容器内部源端口
+port
+
+pause Pause all processes within a container #暂停容器
+
+ps List containers #列出容器列表 
+
+pullPull an image or a repository from the docker registry server#从docker镜像源服务器拉取指定镜像或者库镜像
+
+push Push an image or a repository to the docker registryserver#推送指定镜像或者库镜像至docker源服务器
+
+restart Restart a running container #重启运行的容器
+
+rm Remove one or more containers #移除一个或 或者多个容器 
+
+rmi Remove one or more images #移除一个或多个镜像 像[无容器使用该镜像才可删除，否则需删除相关容器才可继续或-f强制删除 
+
+run Run a command in a new container #创建一个 新的容器并运行一个命令 
+
+save Save an image to a tar archive #保存一个镜 像为一个tar 包[对应load]
+```
+
+
+
+### 九、提交
+
+```
+// 以乌班图为例 ubuntu
+docker run -it ubuntu bash
+
+apt-get update
+
+apt-get -y install vim
+
+// 提交镜像
+docker commit -m='new add vim cmd' -a='zimu' 387aeab98236 zimu/vim-ubuntu
+
+// 查看自己提交的镜像
+docker images
+
+// 提交的阿里云
+docker login --username=951673495@qq.com registry.cn-hangzhou.aliyuncs.com
+
+docker tag 74ae1419570b  registry.cn-hangzhou.aliyuncs.com/docker-zimu-test/docker-ubuntu-test01:1.0;
+
+docker push registry.cn-hangzhou.aliyuncs.com/docker-zimu-test/docker-ubuntu-test01:1.0;
+
+
+// 验证，删除本地的
+docker rmi -f 74ae1419570b
+
+// 阿里云的镜像拉倒本地
+docker pull registry.cn-hangzhou.aliyuncs.com/docker-zimu-test/docker-ubuntu-test01:1.0;
+
+// 查看所有的
+docker images
+
+REPOSITORY                                                                TAG       IMAGE ID       CREATED          SIZE
+registry.cn-hangzhou.aliyuncs.com/docker-zimu-test/docker-ubuntu-test01   1.0       74ae1419570b   40 minutes ago   185MB
+
+// 进入到阿里云的镜像
+docker run -it 74ae1419570b bash
+```
+
+
+
+### 10、数据卷
+
+```
+docker run -it --privileged -v /tmp/host_data:/tmp/docker_data --name=u1 ubuntu
+
+docker ps
+CONTAINER ID   IMAGE     COMMAND   CREATED         STATUS         PORTS     NAMES
+5a8d86e54757   ubuntu    "bash"    4 minutes ago   Up 4 minutes             u1
+
+docker inspect 5a8d86e54757
+
+docker stop 之后再重新启动，数据还在
 ```
 
