@@ -1,0 +1,6 @@
+2024-06-23 17:25:34.404 [main] INFO  TestLogs01 - TestLogs01==================
+2024-06-23 17:25:34.405 [main] INFO  TestLogs01 - TestLogs01---show
+2024-06-23 17:25:34.405 [main] DEBUG TestLogs01 - debugger=================11
+2024-06-23 17:26:00.764 [main] INFO  TestLogs01 - TestLogs01==================
+2024-06-23 17:26:00.765 [main] INFO  TestLogs01 - TestLogs01---show
+2024-06-23 17:26:00.765 [main] DEBUG TestLogs01 - debugger=================11
