@@ -6,6 +6,11 @@ const url = require("url");
 const path = require("path");
 
 const server = http.createServer((req, res) => {
+    if (path.normalize(decodeURI(req.url)) !== decodeURI(req.url)) {
+        res.statusCode = 403;
+        res.end();
+        return;
+    }
     const { pathname } = url.parse(req.url);
 
     res.setHeader("Access-Control-Allow-Origin", "http://127.0.0.1:5500");
